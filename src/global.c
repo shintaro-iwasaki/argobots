@@ -230,10 +230,12 @@ void ABTI_global_update_max_xstreams(int new_size)
 
     ABTI_spinlock_acquire(&gp_ABTI_global->lock);
 
-    new_size = (new_size > 0) ? new_size : gp_ABTI_global->max_xstreams * 2;
+    int cur_size = gp_ABTI_global->max_xstreams;
+    new_size = (new_size > 0) ? new_size : cur_size * 2;
     gp_ABTI_global->max_xstreams = new_size;
     gp_ABTI_global->p_xstreams = (ABTI_xstream **)ABTU_realloc(
-            gp_ABTI_global->p_xstreams, new_size * sizeof(ABTI_xstream *));
+            gp_ABTI_global->p_xstreams, cur_size * sizeof(ABTI_xstream *),
+            new_size * sizeof(ABTI_xstream *));
 
     for (i = gp_ABTI_global->num_xstreams; i < new_size; i++) {
         gp_ABTI_global->p_xstreams[i] = NULL;

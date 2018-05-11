@@ -45,11 +45,7 @@ int ABT_timer_create(ABT_timer *newtimer)
 {
     int abt_errno = ABT_SUCCESS;
 
-    /* We use libc malloc/free for ABT_timer because ABTU_malloc/free might
-     * need the initialization of Argobots if they are not the same as libc
-     * malloc/free.  This is to allow ABT_timer to be used irrespective of
-     * Argobots initialization. */
-    ABTI_timer *p_newtimer = (ABTI_timer *)malloc(sizeof(ABTI_timer));
+    ABTI_timer *p_newtimer = (ABTI_timer *)ABTU_malloc(sizeof(ABTI_timer));
     ABTI_CHECK_TRUE(p_newtimer != NULL, ABT_ERR_MEM);
 
     *newtimer = ABTI_timer_get_handle(p_newtimer);
@@ -123,11 +119,7 @@ int ABT_timer_free(ABT_timer *timer)
     ABTI_timer *p_timer = ABTI_timer_get_ptr(*timer);
     ABTI_CHECK_NULL_TIMER_PTR(p_timer);
 
-    /* We use libc malloc/free for ABT_timer because ABTU_malloc/free might
-     * need the initialization of Argobots if they are not the same as libc
-     * malloc/free.  This is to allow ABT_timer to be used irrespective of
-     * Argobots initialization. */
-    free(p_timer);
+    ABTU_free(p_timer);
     *timer = ABT_TIMER_NULL;
 
   fn_exit:

@@ -166,12 +166,6 @@ AC_ARG_ENABLE([mem-pool],
         [do not use memory pools for ULT and tasklet creation]),,
         [enable_mem_pool=yes])
 
-# --disable-aligned-alloc
-AC_ARG_ENABLE([aligned-alloc],
-    AS_HELP_STRING([--disable-aligned-alloc],
-        [do not use aligned memory allocation]),,
-        [enable_aligned_alloc=yes])
-
 # --enable-feature
 AC_ARG_ENABLE([feature],
 [  --enable-feature@<:@=OPTS@:>@  enable/disable features.
@@ -513,12 +507,6 @@ AS_IF([test "x$enable_preserve_fpu" != "xno"],
 AS_IF([test "x$enable_mem_pool" != "xno"],
       [AC_DEFINE(ABT_CONFIG_USE_MEM_POOL, 1,
           [Define to use memory pools for ULT and tasklet creation])])
-
-
-# --disable-aligned-alloc: Aligned memory allocation is enabled by default.
-AS_IF([test "x$enable_aligned_alloc" != "xno"],
-    [AC_DEFINE(ABT_CONFIG_USE_ALIGNED_ALLOC, 1,
-        [Define to allocate objects aligned to the cache line size])])
 
 
 # --enable-feature

@@ -39,7 +39,7 @@ void ABTI_valgrind_register_stack(const void *p_stack, size_t size) {
     ABTI_PTR_SPINLOCK(&g_valgrind_id_list_lock);
     ABTI_valgrind_id valgrind_id = VALGRIND_STACK_REGISTER(p_start, p_end);
     ABTI_valgrind_id_list *p_valgrind_id_list =
-                 (ABTI_valgrind_id_list *)malloc(sizeof(ABTI_valgrind_id_list));
+        (ABTI_valgrind_id_list *) ABTU_malloc(sizeof(ABTI_valgrind_id_list));
     p_valgrind_id_list->p_stack = p_stack;
     p_valgrind_id_list->valgrind_id = valgrind_id;
     p_valgrind_id_list->p_next = 0;
@@ -63,7 +63,7 @@ void ABTI_valgrind_unregister_stack(const void *p_stack) {
     if (gp_valgrind_id_list_head->p_stack == p_stack) {
         VALGRIND_STACK_DEREGISTER(gp_valgrind_id_list_head->valgrind_id);
         ABTI_valgrind_id_list *p_next = gp_valgrind_id_list_head->p_next;
-        free(gp_valgrind_id_list_head);
+        ABTU_free(gp_valgrind_id_list_head);
         gp_valgrind_id_list_head = p_next;
         if (!p_next)
             gp_valgrind_id_list_tail = NULL;
@@ -80,7 +80,7 @@ void ABTI_valgrind_unregister_stack(const void *p_stack) {
                 p_prev->p_next = p_current->p_next;
                 if (!p_prev->p_next)
                     gp_valgrind_id_list_tail = p_prev;
-                free(p_current);
+                ABTU_free(p_current);
                 deregister_flag = ABT_TRUE;
                 break;
             }

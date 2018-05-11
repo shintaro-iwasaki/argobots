@@ -217,7 +217,7 @@ int ABT_thread_create_many(int num, ABT_pool *pool_list,
     allocsize = stacksize * num;
     actual_stacksize = stacksize - header_size;
 
-    p_blk = (char *)ABTU_CA_MALLOC(allocsize);
+    p_blk = (char *)ABTU_malloc(allocsize);
     for (i = 0; i < num; i++) {
         p_newthread = (ABTI_thread *)p_blk;
 
