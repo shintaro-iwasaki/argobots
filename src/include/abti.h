@@ -138,6 +138,11 @@ typedef struct ABTI_sp_header       ABTI_sp_header;
 typedef struct ABTI_spinlock        ABTI_spinlock;
 #include "abti_spinlock.h"
 
+/* Forward Declaration */
+#define ABT_MEM_NUM_ENTRIES 2
+#define ABT_MEM_ENTRY_INDEX_THREAD_STACK_AND_DESC 0
+#define ABT_MEM_ENTRY_INDEX_TASK_DESC 1
+#include "abti_mem_pool_def.h"
 
 /* Definitions */
 struct ABTI_mutex_attr {
@@ -180,14 +185,11 @@ struct ABTI_global {
     uint32_t os_page_size;             /* OS page size */
     uint32_t huge_page_size;           /* Huge page size */
 #ifdef ABT_CONFIG_USE_MEM_POOL
-    ABTI_spinlock mem_task_lock;       /* Spinlock protecting p_mem_task */
     uint32_t mem_page_size;            /* Page size for memory allocation */
     uint32_t mem_sp_size;              /* Stack page size */
     uint32_t mem_max_stacks;           /* Max. # of stacks kept in each ES */
     int mem_lp_alloc;                  /* How to allocate large pages */
-    ABTI_stack_header *p_mem_stack;    /* List of ULT stack */
-    ABTI_page_header *p_mem_task;      /* List of task block pages */
-    ABTI_sp_header *p_mem_sph;         /* List of stack pages */
+    ABTI_mem_global_pool *p_mem_pools[ABT_MEM_NUM_ENTRIES]; /* Memory pools. */
 #endif
 
     ABT_bool pm_connected;      /* Is power mgmt. daemon connected? */
@@ -206,12 +208,8 @@ struct ABTI_local {
     ABTI_xstream *p_xstream;    /* Current ES */
     ABTI_thread *p_thread;      /* Current running ULT */
     ABTI_task *p_task;          /* Current running tasklet */
-
 #ifdef ABT_CONFIG_USE_MEM_POOL
-    uint32_t num_stacks;                /* Current # of stacks */
-    ABTI_stack_header *p_mem_stack;     /* Free stack list */
-    ABTI_page_header *p_mem_task_head;  /* Head of page list */
-    ABTI_page_header *p_mem_task_tail;  /* Tail of page list */
+    ABTI_mem_local_pool mem_pools[ABT_MEM_NUM_ENTRIES]; /* Memory pools. */
 #endif
 };
 
@@ -660,6 +658,7 @@ void ABTI_event_publish_info(void);
 #include "abti_future.h"
 #include "abti_barrier.h"
 #include "abti_timer.h"
+#include "abti_mem_pool.h"
 #include "abti_mem.h"
 
 #endif /* ABTI_H_INCLUDED */

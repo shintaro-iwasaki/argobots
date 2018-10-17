@@ -194,6 +194,9 @@ void ABTD_env_init(ABTI_global *p_global)
     } else {
         p_global->mem_max_stacks = ABTD_MEM_MAX_NUM_STACKS;
     }
+    /* Must be a multiple of ABT_MEM_BLOCKSIZE. Round up. */
+    p_global->mem_max_stacks = (p_global->mem_max_stacks + ABT_MEM_BLOCKSIZE
+                                - 1) & (~(ABT_MEM_BLOCKSIZE - 1));
 
     /* How to allocate large pages.  The default is to use mmap() for huge
      * pages and then to fall back to allocate regular pages using mmap() when
