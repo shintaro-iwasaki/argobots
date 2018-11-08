@@ -1,4 +1,17 @@
 ===============================================================================
+                               Changes in 1.0rc1
+===============================================================================
+
+- Added a new pool type and a new scheduler type
+- Supported the dynamic promotion thread
+- Supported GCC's __atomic builtins
+- Reduced the overhead of context switching
+- Fixed a bug in the condition variable
+- Fixed bugs in memory pool
+- Fixed bugs in pool operation
+- Fixed Valgrind support
+
+===============================================================================
                                Changes in 1.0b1
 ===============================================================================
 
