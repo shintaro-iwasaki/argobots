@@ -44,6 +44,86 @@ ABT_thread ABTI_thread_get_handle(ABTI_thread *p_thread)
 static inline
 ABT_bool ABTI_thread_dynamic_promoted(ABTI_thread *p_thread)
 {
+    /*
+     * Create a context and switch to it. The flow of the dynamic promotion
+     * thread is as follows:
+     *
+     * - When a ULT does not yield:
+     *  ABTI_xstream_schedule_thread : call init_and_call_fcontext
+     *  init_and_call_fcontext       : jump to the stack top
+     *                               : save the scheduler's context
+     *                               : call the thread function
+     *  thread_f                     : start thread_f
+     *                               : [ULT body]
+     *                               : end thread_f
+     *  init_and_call_fcontext       : calculate the return address, which is
+     *  [1] =>                         the original return address.
+     *                               : `return`
+     *  ABTI_xstream_schedule_thread : resume the scheduler
+     *
+     * The ULT can return to the original scheduler by `return` if the scheduler
+     * has never been resumed during the execution of the ULT, because the
+     * context of the parent scheduler can be restored in a normal return
+     * procedure. In this case, the context is saved only once.
+     *
+     * - When a ULT yields:
+     *  ABTI_xstream_schedule_thread : call init_and_call_fcontext
+     *  init_and_call_fcontext       : jump to the stack top
+     *                               : save the scheduler's context
+     *                               : call the thread function
+     *  thread_f                     : start thread_f
+     *                               : [yield in ULT body]
+     *  ABTD_thread_context_dynamic_promote
+     *                               : rewrite the return address to
+     *                                 ABTD_thread_terminate_thread_no_arg
+     *  jump_fcontext                : save the ULT's context
+     *                               : restore the scheduler's context
+     *                               : jump to the scheduler
+     *  ABTI_xstream_schedule_thread : resume the scheduler
+     *
+     *            ... After a while, a scheduler resumes this ULT ...
+     *
+     *  jump_fcontext                : save the scheduler's context
+     *                               : restore the ULT's context
+     *                               : jump to the ULT
+     *  thread_f                     : [ULT body (remaining)]
+     *                               : end thread_f
+     *  init_and_call_fcontext       : calculate the return address, which is
+     *  [2] =>                         ABTD_thread_terminate_thread_no_arg
+     *                               : return
+     *  ABTD_thread_terminate_thread_no_arg
+     *                               : call take_fcontext
+     *  take_fcontext                : restore the scheduler's context
+     *                               : jump to the scheduler
+     *  ABTI_xstream_schedule_thread : resume the scheduler
+     *
+     * When a ULT yields, ABTD_thread_terminate_thread_no_arg is set to
+     * [ptr - 0x08] so that it can "jump" to the normal termination
+     * function by "return" in init_and_call_fcontext. This termination
+     * function calls take_fcontext, so the scheduler is resumed by user-level
+     * context switch.
+     *
+     * For example, the stack will be as follows at [1] and [2] in the x86-64
+     * case. Note that ptr points to the stack top (= p_stack + stacksize).
+     *
+     * In the case of [1] (no suspension):
+     *  [0x12345600] : (the original instruction pointer)
+     *   ...
+     *  [ptr - 0x08] : the original stack pointer (i.e., 0x12345600)
+     *  [ptr - 0x10] : unused (for 16-byte alignment)
+     *  [ptr - xxxx] : used by thread_f
+     *
+     * In the case of [2] (after suspension):
+     *  [ptr - 0x08] : pointing to (p_stack - 0x10)
+     *  [ptr - 0x10] : the address of ABTD_thread_terminate_thread_no_arg
+     *  [ptr - xxxx] : used by thread_f
+     *
+     * This technique was introduced as a "return-on-completion" thread in the
+     * following paper:
+     *   Lessons Learned from Analyzing Dynamic Promotion for User-Level
+     *   Threading, S. Iwasaki, A. Amer, K. Taura, and P. Balaji (SC '18)
+     */
+    /* This function itself does not distinguish between thread and sched. */
     return ABTD_thread_context_dynamic_promoted(&p_thread->ctx);
 }
 
