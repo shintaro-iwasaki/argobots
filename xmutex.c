@@ -206,8 +206,7 @@ void ABTI_mutex_lock_low(ABTI_mutex *p_mutex)
         ABTI_thread *p_self = ABTI_local_get_thread();
         ABTI_xstream *p_xstream = p_self->p_last_xstream;
         int rank = (int)p_xstream->rank;
-        /* Ignore if queue[rank] has not been created. */
-        if (rank < p_htable->num_rows) {
+#warning ignore it!
         ABTI_thread_queue *p_queue = &p_htable->queue[rank];
         if (p_queue->low_num_threads > 0) {
             ABT_bool ret = ABTI_thread_htable_switch_low(p_queue, p_self, p_htable);
@@ -215,7 +214,6 @@ void ABTI_mutex_lock_low(ABTI_mutex *p_mutex)
                 /* This ULT became a waiter in the mutex queue */
                 goto check_handover;
             }
-        }
         }
 
         if ((c = ABTD_atomic_val_cas_strong_uint32(&p_mutex->val, 0, 1)) != 0) {
@@ -493,14 +491,9 @@ int ABTI_mutex_unlock_se(ABTI_mutex *p_mutex)
     p_xstream = p_thread->p_last_xstream;
     ABTI_ASSERT(p_xstream == ABTI_local_get_xstream());
     i = (int)p_xstream->rank;
-    if (i >= &p_htable->num_rows) {
-        /* queue[i] has not been created, so no waiting threads in the queue. */
-        ABTD_atomic_store_uint32(&p_mutex->val, 0); /* Unlock */
-        LOG_EVENT("%p: unlock_se\n", p_mutex);
-        ABTI_mutex_wake_de(p_mutex);
-        ABTI_thread_yield(p_thread);
-        return abt_errno;
-    }
+
+#warning "Just return!"
+
     p_queue = &p_htable->queue[i];
 
  check_cond:
@@ -661,12 +654,31 @@ void ABTI_mutex_wait(ABTI_mutex *p_mutex, int val)
     ABTI_thread *p_self = ABTI_local_get_thread();
     ABTI_xstream *p_xstream = p_self->p_last_xstream;
 
+#if 0
+    if (p_queue->num_threads > 0) {
+        /* Push the current ULT to the queue */
+        if (ABTI_thread_htable_add(p_htable, rank, p_self) == ABT_TRUE) {
+            /* If p_queue is not linked in the list, we should correct it. */
+            if (p_queue->p_h_next == NULL) {
+                ABTI_THREAD_HTABLE_LOCK(p_htable->mutex);
+                ABTI_thread_htable_add_h_node(p_htable, p_queue);
+                ABTI_THREAD_HTABLE_UNLOCK(p_htable->mutex);return;
+            }
+
+            /* Suspend the current ULT */
+            ABTI_thread_suspend(p_self);
+
+            return;
+        }
+    }
+#endif
+
     ABTI_THREAD_HTABLE_LOCK(p_htable->mutex);
 
     int rank = (int)p_xstream->rank;
     ABTI_ASSERT(rank < p_htable->num_rows);
-    ABTI_thread_queue *p_queue = &p_htable->queue[rank];
-#warning "WARNING1"
+    ABTI_thread_queue *p_queue = &p_htable->protected_queue[rank];
+#warning "extend it"
 
     if (ABTD_atomic_load_uint32(&p_mutex->val) != val) {
         ABTI_THREAD_HTABLE_UNLOCK(p_htable->mutex);
@@ -681,7 +693,7 @@ void ABTI_mutex_wait(ABTI_mutex *p_mutex, int val)
     ABTI_thread_set_blocked(p_self);
 
     /* Push the current ULT to the queue */
-    ABTI_thread_htable_push(p_htable, rank, p_self);
+    ABTI_thread_htablex_push(p_htable, rank, p_self);
 
     /* Unlock */
     ABTI_THREAD_HTABLE_UNLOCK(p_htable->mutex);
@@ -696,12 +708,31 @@ void ABTI_mutex_wait_low(ABTI_mutex *p_mutex, int val)
     ABTI_thread *p_self = ABTI_local_get_thread();
     ABTI_xstream *p_xstream = p_self->p_last_xstream;
 
+#if 0
+    if (p_queue->low_num_threads > 0) {
+        /* Push the current ULT to the queue */
+        if (ABTI_thread_htable_add_low(p_htable, rank, p_self) == ABT_TRUE) {
+            /* If p_queue is not linked in the list, we should correct it. */
+            if (p_queue->p_l_next == NULL) {
+                ABTI_THREAD_HTABLE_LOCK(p_htable->mutex);
+                ABTI_thread_htable_add_l_node(p_htable, p_queue);
+                ABTI_THREAD_HTABLE_UNLOCK(p_htable->mutex);
+            }
+
+            /* Suspend the current ULT */
+            ABTI_thread_suspend(p_self);
+
+            return;
+        }
+    }
+#endif
+
     ABTI_THREAD_HTABLE_LOCK(p_htable->mutex);
 
+#warning "extend it"
     int rank = (int)p_xstream->rank;
     ABTI_ASSERT(rank < p_htable->num_rows);
     ABTI_thread_queue *p_queue = &p_htable->queue[rank];
-#warning "WARNING2"
 
     if (ABTD_atomic_load_uint32(&p_mutex->val) != val) {
         ABTI_THREAD_HTABLE_UNLOCK(p_htable->mutex);
@@ -716,7 +747,7 @@ void ABTI_mutex_wait_low(ABTI_mutex *p_mutex, int val)
     ABTI_thread_set_blocked(p_self);
 
     /* Push the current ULT to the queue */
-    ABTI_thread_htable_push_low(p_htable, rank, p_self);
+    ABTI_thread_htablex_push_low(p_htable, rank, p_self);
 
     /* Unlock */
     ABTI_THREAD_HTABLE_UNLOCK(p_htable->mutex);
