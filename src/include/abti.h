@@ -236,7 +236,6 @@ struct ABTI_sched {
     ABT_bool automatic;         /* To know if automatic data free */
     ABTI_sched_kind kind;       /* Kind of the scheduler  */
     ABT_sched_type type;        /* Can yield or not (ULT or task) */
-    ABT_sched_state state;      /* State */
     ABTD_atomic_uint32 request; /* Request */
     ABT_pool *pools;            /* Work unit pools */
     int num_pools;              /* Number of work unit pools */

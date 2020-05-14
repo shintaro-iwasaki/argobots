@@ -134,13 +134,6 @@ enum ABT_task_state {
     ABT_TASK_STATE_TERMINATED
 };
 
-enum ABT_sched_state {
-    ABT_SCHED_STATE_READY,
-    ABT_SCHED_STATE_RUNNING,
-    ABT_SCHED_STATE_STOPPED,
-    ABT_SCHED_STATE_TERMINATED
-};
-
 enum ABT_sched_predef {
     ABT_SCHED_DEFAULT,   /* Default scheduler */
     ABT_SCHED_BASIC,     /* Basic scheduler */
@@ -259,8 +252,6 @@ typedef struct ABT_sched_opaque *           ABT_sched;
 typedef struct ABT_sched_config_opaque *    ABT_sched_config;
 /* Predefined scheduler */
 typedef enum ABT_sched_predef               ABT_sched_predef;
-/* Scheduler state */
-typedef enum ABT_sched_state                ABT_sched_state;
 /* Scheduler type */
 typedef enum ABT_sched_type                 ABT_sched_type;
 /* Pool */
