@@ -60,74 +60,35 @@ ABTI_mem_alloc_thread_stack_mempool(ABTI_xstream *p_local_xstream,
     return p_stack;
 }
 
-static inline void ABTI_mem_alloc_thread_default(ABTI_xstream *p_local_xstream,
-                                                 ABTI_thread *p_thread)
+static inline void ABTI_mem_setup_thread_stack(ABTI_xstream *p_local_xstream,
+                                               ABTI_thread *p_thread)
 {
-    size_t stacksize = ABTI_global_get_thread_stacksize();
-    void *p_stack;
+    ABTI_stack_type stacktype = p_thread->attr.stacktype;
+    if (stacktype == ABTI_STACK_TYPE_MEMPOOL) {
 #ifndef ABT_CONFIG_DISABLE_EXT_THREAD
-    /* If an external thread allocates a stack, we use ABTU_malloc. */
-    if (p_local_xstream == NULL) {
-        p_stack = ABTI_mem_alloc_thread_stack_malloc(stacksize);
-        /* Initialize p_attr. */
-        ABTI_thread_attr_init(&p_thread->attr, p_stack, stacksize,
-                              ABTI_STACK_TYPE_MALLOC, ABT_TRUE);
-        return;
-    }
+        if (p_local_xstream == NULL) {
+            p_thread->attr.p_stack =
+                ABTI_mem_alloc_thread_stack_malloc(p_thread->attr.stacksize);
+            /* stacktype is changed. */
+            p_thread->attr.stacktype = ABTI_STACK_TYPE_MALLOC;
+            return;
+        }
 #endif
-    p_stack = ABTI_mem_alloc_thread_stack_mempool(p_local_xstream, stacksize);
-    /* Initialize p_attr. */
-    ABTI_thread_attr_init(&p_thread->attr, p_stack, stacksize,
-                          ABTI_STACK_TYPE_MEMPOOL, ABT_TRUE);
-}
-
-static inline void ABTI_mem_alloc_thread_mempool(ABTI_xstream *p_local_xstream,
-                                                 ABTI_thread *p_thread,
-                                                 ABTI_thread_attr *p_attr)
-{
-    size_t stacksize = ABTI_global_get_thread_stacksize();
-    void *p_stack;
-#ifndef ABT_CONFIG_DISABLE_EXT_THREAD
-    /* If an external thread allocates a stack, we use ABTU_malloc. */
-    if (p_local_xstream == NULL) {
-        p_stack = ABTI_mem_alloc_thread_stack_malloc(stacksize);
-        /* Copy p_attr. */
-        ABTI_thread_attr_copy(&p_thread->attr, p_attr);
-        p_thread->attr.stacktype = ABTI_STACK_TYPE_MALLOC;
-        p_thread->attr.stacksize = stacksize;
-        p_thread->attr.p_stack = p_stack;
-        return;
+        p_thread->attr.p_stack =
+            ABTI_mem_alloc_thread_stack_mempool(p_local_xstream,
+                                                p_thread->attr.stacksize);
+    } else if (stacktype == ABTI_STACK_TYPE_MALLOC) {
+        p_thread->attr.p_stack =
+            ABTI_mem_alloc_thread_stack_malloc(p_thread->attr.stacksize);
+    } else if (stacktype == ABTI_STACK_TYPE_USER) {
+        /* Do not allocate stack, but Valgrind registration is preferred. */
+        ABTI_VALGRIND_REGISTER_STACK(p_thread->attr.p_stack,
+                                     p_thread->attr.stacksize);
+    } else {
+        ABTI_ASSERT(stacktype == ABTI_STACK_TYPE_MAIN);
+        /* Stack of the currently running Pthreads is used, so we do not need to
+         * register it to Valgrind. */
     }
-#endif
-    p_stack = ABTI_mem_alloc_thread_stack_mempool(p_local_xstream, stacksize);
-    /* Copy p_attr. */
-    ABTI_thread_attr_copy(&p_thread->attr, p_attr);
-    p_thread->attr.stacksize = stacksize;
-    p_thread->attr.p_stack = p_stack;
-}
-
-static inline void ABTI_mem_alloc_thread_malloc(ABTI_thread *p_thread,
-                                                ABTI_thread_attr *p_attr)
-{
-    void *p_stack = ABTI_mem_alloc_thread_stack_malloc(p_attr->stacksize);
-    /* Copy p_attr. */
-    ABTI_thread_attr_copy(&p_thread->attr, p_attr);
-    p_thread->attr.p_stack = p_stack;
-}
-
-static inline ABTI_thread *ABTI_mem_alloc_thread_user(ABTI_thread *p_thread,
-                                                      ABTI_thread_attr *p_attr)
-{
-    /* Do not allocate stack, but Valgrind registration is preferred. */
-    ABTI_VALGRIND_REGISTER_STACK(p_thread->attr.p_stack, p_attr->stacksize);
-    ABTI_thread_attr_copy(&p_thread->attr, p_attr);
-}
-
-static inline ABTI_thread *ABTI_mem_alloc_thread_main(ABTI_thread *p_thread,
-                                                      ABTI_thread_attr *p_attr)
-{
-    /* Stack of the currently running Pthreads is used. */
-    ABTI_thread_attr_copy(&p_thread->attr, p_attr);
 }
 
 static inline ABTI_thread *ABTI_mem_alloc_thread(ABTI_xstream *p_local_xstream,
@@ -136,24 +97,18 @@ static inline ABTI_thread *ABTI_mem_alloc_thread(ABTI_xstream *p_local_xstream,
     ABTI_thread *p_thread = ABTI_mem_alloc_thread_desc(p_local_xstream);
 
     if (!p_attr) {
-        ABTI_mem_alloc_thread_default(p_local_xstream, p_thread);
-        return p_thread;
-    }
-    ABTI_stack_type stacktype = p_attr->stacktype;
-    if (stacktype == ABTI_STACK_TYPE_MEMPOOL) {
-        ABTI_mem_alloc_thread_mempool(p_local_xstream, p_thread, p_attr);
-        return p_thread;
-    } else if (stacktype == ABTI_STACK_TYPE_MALLOC) {
-        ABTI_mem_alloc_thread_malloc(p_thread, p_attr);
-        return p_thread;
-    } else if (stacktype == ABTI_STACK_TYPE_USER) {
-        ABTI_mem_alloc_thread_user(p_thread, p_attr);
-        return p_thread;
+        /* Initialize thread_attr to the default one. */
+        ABTI_thread_attr_init(&p_thread->attr, NULL,
+                              ABTI_global_get_thread_stacksize(),
+                              ABTI_STACK_TYPE_MEMPOOL, ABT_TRUE);
     } else {
-        ABTI_ASSERT(stacktype == ABTI_STACK_TYPE_MAIN);
-        ABTI_mem_alloc_thread_main(p_thread, p_attr);
-        return p_thread;
+        /* Copy a user-given attribute. */
+        ABTI_thread_attr_copy(&p_thread->attr, p_attr);
     }
+
+    ABTI_mem_setup_thread_stack(p_local_xstream, p_thread);
+
+    return p_thread;
 }
 
 static inline void ABTI_mem_free_thread(ABTI_xstream *p_local_xstream,
