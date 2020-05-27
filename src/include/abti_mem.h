@@ -122,13 +122,13 @@ static inline void ABTI_mem_free_thread_desc(ABTI_xstream *p_local_xstream,
 #ifndef ABT_CONFIG_DISABLE_EXT_THREAD
         if (p_local_xstream == NULL) {
             /* Return a stack to the global pool. */
-            ABTI_spinlock_acquire(&gp_ABTI_global->mem_pool_desc_lock);
-            ABTI_mem_pool_free(&gp_ABTI_global->mem_pool_desc_ext, p_thread);
-            ABTI_spinlock_release(&gp_ABTI_global->mem_pool_desc_lock);
+            ABTI_spinlock_acquire(&gp_ABTI_global->mem_pool_thread_desc_lock);
+            ABTI_mem_pool_free(&gp_ABTI_global->mem_pool_thread_desc_ext, p_thread);
+            ABTI_spinlock_release(&gp_ABTI_global->mem_pool_thread_desc_lock);
             return;
         }
 #endif
-        ABTI_mem_pool_free(&p_local_xstream->mem_pool_desc, p_thread);
+        ABTI_mem_pool_free(&p_local_xstream->mem_pool_thread_desc, p_thread);
     }
 }
 
