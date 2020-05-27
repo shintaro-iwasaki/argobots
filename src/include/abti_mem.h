@@ -111,54 +111,60 @@ static inline ABTI_thread *ABTI_mem_alloc_thread(ABTI_xstream *p_local_xstream,
     return p_thread;
 }
 
-static inline void ABTI_mem_free_thread(ABTI_xstream *p_local_xstream,
-                                        ABTI_thread *p_thread)
+static inline void ABTI_mem_free_thread_desc(ABTI_xstream *p_local_xstream,
+                                             ABTI_thread *p_thread)
 {
-    ABTI_VALGRIND_UNREGISTER_STACK(p_thread->attr.p_stack);
-
-    /* Return stack. */
-    if (p_thread->attr.stacktype == ABTI_STACK_TYPE_MALLOC) {
-        ABTU_free(p_thread->attr.p_stack);
-    } else if (p_thread->attr.stacktype == ABTI_STACK_TYPE_MEMPOOL) {
-        /* Came from a memory pool. */
-        do {
-#ifndef ABT_CONFIG_DISABLE_EXT_THREAD
-            if (p_local_xstream == NULL) {
-                /* Return a stack to the global pool. */
-                ABTI_spinlock_acquire(&gp_ABTI_global->mem_pool_stack_lock);
-                ABTI_mem_pool_free(&gp_ABTI_global->mem_pool_stack_ext,
-                                   p_thread->attr.p_stack);
-                ABTI_spinlock_release(&gp_ABTI_global->mem_pool_stack_lock);
-                break;
-            }
-#endif
-            ABTI_mem_pool_free(&p_local_xstream->mem_pool_stack,
-                               p_thread->attr.p_stack);
-        } while (0);
-    }
-
-    /* Return a thread descriptor. */
+    /* Release a thread descriptor. */
     if (*(uint32_t *)(((char *)p_thread) + sizeof(ABTI_thread))) {
         ABTU_free(p_thread);
     } else {
         /* Came from a memory pool. */
-        do {
 #ifndef ABT_CONFIG_DISABLE_EXT_THREAD
-            if (p_local_xstream == NULL) {
-                /* Return a stack to the global pool. */
-                ABTI_spinlock_acquire(
-                    &gp_ABTI_global->mem_pool_thread_desc_lock);
-                ABTI_mem_pool_free(&gp_ABTI_global->mem_pool_thread_desc_ext,
-                                   p_thread);
-                ABTI_spinlock_release(
-                    &gp_ABTI_global->mem_pool_thread_desc_lock);
-                break;
-            }
+        if (p_local_xstream == NULL) {
+            /* Return a stack to the global pool. */
+            ABTI_spinlock_acquire(&gp_ABTI_global->mem_pool_desc_lock);
+            ABTI_mem_pool_free(&gp_ABTI_global->mem_pool_desc_ext, p_thread);
+            ABTI_spinlock_release(&gp_ABTI_global->mem_pool_desc_lock);
+            return;
+        }
 #endif
-            ABTI_mem_pool_free(&p_local_xstream->mem_pool_thread_desc,
-                               p_thread);
-        } while (0);
+        ABTI_mem_pool_free(&p_local_xstream->mem_pool_desc, p_thread);
     }
+}
+
+static inline void ABTI_mem_release_thread_stack(ABTI_xstream *p_local_xstream,
+                                                 ABTI_thread *p_thread)
+{
+    /* Release a stack. */
+    if (p_thread->attr.stacktype == ABTI_STACK_TYPE_MALLOC) {
+        ABTI_VALGRIND_UNREGISTER_STACK(p_thread->attr.p_stack);
+        ABTU_free(p_thread->attr.p_stack);
+    } else if (p_thread->attr.stacktype == ABTI_STACK_TYPE_MEMPOOL) {
+        ABTI_VALGRIND_UNREGISTER_STACK(p_thread->attr.p_stack);
+        /* Came from a memory pool. */
+#ifndef ABT_CONFIG_DISABLE_EXT_THREAD
+        if (p_local_xstream == NULL) {
+            /* Return a stack to the global pool. */
+            ABTI_spinlock_acquire(&gp_ABTI_global->mem_pool_stack_lock);
+            ABTI_mem_pool_free(&gp_ABTI_global->mem_pool_stack_ext,
+                               p_thread->attr.p_stack);
+            ABTI_spinlock_release(&gp_ABTI_global->mem_pool_stack_lock);
+            return;
+        }
+#endif
+        ABTI_mem_pool_free(&p_local_xstream->mem_pool_stack,
+                           p_thread->attr.p_stack);
+    } else if (p_thread->attr.stacktype == ABTI_STACK_TYPE_USER) {
+        /* The stack is allocated by a user, so no need to release a stack. */
+        ABTI_VALGRIND_UNREGISTER_STACK(p_thread->attr.p_stack);
+    }
+}
+
+static inline void ABTI_mem_free_thread(ABTI_xstream *p_local_xstream,
+                                        ABTI_thread *p_thread)
+{
+    ABTI_mem_release_thread_stack(p_local_xstream, p_thread);
+    ABTI_mem_free_thread_desc(p_local_xstream, p_thread);
 }
 
 static inline ABTI_task *ABTI_mem_alloc_task(ABTI_xstream *p_local_xstream)
