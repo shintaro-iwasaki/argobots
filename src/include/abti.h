@@ -124,6 +124,9 @@ typedef struct ABTI_eventual ABTI_eventual;
 typedef struct ABTI_future ABTI_future;
 typedef struct ABTI_barrier ABTI_barrier;
 typedef struct ABTI_timer ABTI_timer;
+#ifndef ABT_CONFIG_DISABLE_TOOL_INTERFACE
+typedef struct ABTI_tool_context ABTI_tool_context;
+#endif
 /* ID associated with native thread (e.g, Pthreads), which can distinguish
  * execution streams and external threads */
 struct ABTI_native_thread_id_opaque;
@@ -203,6 +206,12 @@ struct ABTI_global {
 #endif
 
     ABT_bool print_config; /* Whether to print config on ABT_init */
+
+#ifndef ABT_CONFIG_DISABLE_TOOL_INTERFACE
+    uint64_t tool_event_mask;
+    ABT_tool_thread_callback_fn tool_thread_cb_f;
+    ABT_tool_task_callback_fn tool_task_cb_f;
+#endif
 };
 
 struct ABTI_local_func {
@@ -415,6 +424,16 @@ struct ABTI_timer {
     ABTD_time end;
 };
 
+#ifndef ABT_CONFIG_DISABLE_TOOL_INTERFACE
+struct ABTI_tool_context {
+    ABTI_pool *p_pool;
+    ABT_exec_entity_type caller_type;
+    ABTI_unit *p_caller;
+    ABT_sync_event_type sync_event_type;
+    void *p_sync_object; /* ABTI type */
+};
+#endif
+
 /* Global Data */
 extern ABTI_global *gp_ABTI_global;
 extern ABTI_local_func gp_ABTI_local_func;
@@ -595,6 +614,7 @@ void ABTI_info_check_print_all_thread_stacks(void);
 #include "abti_unit.h"
 #include "abti_stream.h"
 #include "abti_self.h"
+#include "abti_tool.h"
 #include "abti_thread.h"
 #include "abti_thread_attr.h"
 #include "abti_task.h"
