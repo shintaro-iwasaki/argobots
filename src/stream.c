@@ -346,7 +346,8 @@ int ABTI_xstream_start_primary(ABTI_xstream **pp_local_xstream,
     /* Start the scheduler by context switching to it */
     LOG_DEBUG("[U%" PRIu64 ":E%d] yield\n", ABTI_thread_get_id(p_thread),
               p_thread->unit_def.p_last_xstream->rank);
-    ABTI_thread_context_switch_to_parent(pp_local_xstream, p_thread);
+    ABTI_thread_context_switch_to_parent(pp_local_xstream, p_thread,
+                                         ABT_SYNC_EVENT_TYPE_OTHER, NULL);
 
     /* Back to the main ULT */
     LOG_DEBUG("[U%" PRIu64 ":E%d] resume\n", ABTI_thread_get_id(p_thread),
@@ -488,7 +489,8 @@ int ABT_xstream_exit(void)
             continue;
         }
 #endif
-        ABTI_thread_yield(&p_local_xstream, ABTI_unit_get_thread(p_self));
+        ABTI_thread_yield(&p_local_xstream, ABTI_unit_get_thread(p_self),
+                          ABT_SYNC_EVENT_TYPE_OTHER, NULL);
     } while (ABTD_atomic_acquire_load_int(&p_local_xstream->state) !=
              ABT_XSTREAM_STATE_TERMINATED);
 
@@ -1281,7 +1283,9 @@ int ABTI_xstream_join(ABTI_xstream **pp_local_xstream, ABTI_xstream *p_xstream)
         ABTI_xstream_set_request(p_xstream, ABTI_XSTREAM_REQ_JOIN);
 
         /* If the caller is a ULT, it is blocked here */
-        ABTI_thread_suspend(pp_local_xstream, p_thread);
+        ABTI_thread_suspend(pp_local_xstream, p_thread,
+                            ABT_SYNC_EVENT_TYPE_XSTREAM_JOIN,
+                            (void *)p_xstream);
     } else {
         /* Set the join request */
         ABTI_xstream_set_request(p_xstream, ABTI_XSTREAM_REQ_JOIN);
@@ -1295,7 +1299,9 @@ int ABTI_xstream_join(ABTI_xstream **pp_local_xstream, ABTI_xstream *p_xstream)
                 continue;
             }
 #endif
-            ABTI_thread_yield(pp_local_xstream, p_thread);
+            ABTI_thread_yield(pp_local_xstream, p_thread,
+                              ABT_SYNC_EVENT_TYPE_XSTREAM_JOIN,
+                              (void *)p_xstream);
             p_local_xstream = *pp_local_xstream;
         }
     }
@@ -1548,9 +1554,11 @@ void ABTI_xstream_schedule_task(ABTI_xstream *p_local_xstream,
     p_task->unit_def.p_parent = p_sched_unit;
 
     /* Execute the task function */
+    ABTI_tool_event_task_run(p_task, p_local_xstream, p_sched_unit);
     LOG_DEBUG("[T%" PRIu64 ":E%d] running\n", ABTI_task_get_id(p_task),
               p_local_xstream->rank);
     p_task->unit_def.f_unit(p_task->unit_def.p_arg);
+    ABTI_tool_event_task_finish(p_task, p_local_xstream);
     LOG_DEBUG("[T%" PRIu64 ":E%d] stopped\n", ABTI_task_get_id(p_task),
               p_local_xstream->rank);
 
@@ -1748,7 +1756,8 @@ int ABTI_xstream_update_main_sched(ABTI_xstream **pp_local_xstream,
 
         /* Switch to the current main scheduler */
         ABTI_thread_set_request(p_thread, ABTI_UNIT_REQ_NOPUSH);
-        ABTI_thread_context_switch_to_parent(pp_local_xstream, p_thread);
+        ABTI_thread_context_switch_to_parent(pp_local_xstream, p_thread,
+                                             ABT_SYNC_EVENT_TYPE_OTHER, NULL);
 
         /* Now, we free the current main scheduler. p_main_sched->p_thread must
          * be NULL to avoid freeing it in ABTI_sched_discard_and_free(). */

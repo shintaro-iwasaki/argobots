@@ -223,7 +223,9 @@ ABTI_thread *ABTI_thread_htable_pop_low(ABTI_thread_htable *p_htable,
 ABT_bool ABTI_thread_htable_switch_low(ABTI_xstream **pp_local_xstream,
                                        ABTI_thread_queue *p_queue,
                                        ABTI_thread *p_thread,
-                                       ABTI_thread_htable *p_htable)
+                                       ABTI_thread_htable *p_htable,
+                                       ABT_sync_event_type sync_event_type,
+                                       void *p_sync)
 {
     ABTI_thread *p_target = NULL;
 
@@ -234,6 +236,8 @@ ABT_bool ABTI_thread_htable_switch_low(ABTI_xstream **pp_local_xstream,
         /* Push p_thread to the queue */
         ABTD_atomic_release_store_int(&p_thread->unit_def.state,
                                       ABTI_UNIT_STATE_BLOCKED);
+        ABTI_tool_event_thread_suspend(p_thread, *pp_local_xstream,
+                                       sync_event_type, p_sync);
         if (p_queue->low_head == p_queue->low_tail) {
             p_queue->low_head = p_thread;
             p_queue->low_tail = p_thread;
@@ -251,8 +255,12 @@ ABT_bool ABTI_thread_htable_switch_low(ABTI_xstream **pp_local_xstream,
         /* Context-switch to p_target */
         ABTD_atomic_release_store_int(&p_target->unit_def.state,
                                       ABTI_UNIT_STATE_RUNNING);
-        ABTI_thread_context_switch_to_sibling(pp_local_xstream, p_thread,
-                                              p_target);
+        ABTI_tool_event_thread_resume(p_target, *pp_local_xstream);
+        ABTI_thread *p_prev =
+            ABTI_thread_context_switch_to_sibling(pp_local_xstream, p_thread,
+                                                  p_target);
+        ABTI_tool_event_thread_run(p_thread, *pp_local_xstream,
+                                   &p_prev->unit_def);
         return ABT_TRUE;
     } else {
         return ABT_FALSE;

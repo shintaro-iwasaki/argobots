@@ -65,6 +65,12 @@ int ABT_init(int argc, char **argv)
     ABTI_sched_reset_id();
     ABTI_pool_reset_id();
 
+#ifndef ABT_CONFIG_DISABLE_TOOL_INTERFACE
+    /* Initialize the tool interface */
+    gp_ABTI_global->tool_event_mask = 0;
+    gp_ABTI_global->tool_thread_cb_f = NULL;
+#endif
+
     /* Initialize the ES array */
     gp_ABTI_global->p_xstreams =
         (ABTI_xstream **)ABTU_calloc(gp_ABTI_global->max_xstreams,
@@ -161,6 +167,12 @@ int ABT_finalize(void)
                         "ABT_finalize must be called by the primary ULT.");
     ABTI_thread *p_thread = ABTI_unit_get_thread(p_self);
 
+#ifndef ABT_CONFIG_DISABLE_TOOL_INTERFACE
+    /* Turns off the tool interface */
+    gp_ABTI_global->tool_event_mask = 0;
+    gp_ABTI_global->tool_thread_cb_f = NULL;
+#endif
+
     /* Set the join request */
     ABTI_xstream_set_request(p_local_xstream, ABTI_XSTREAM_REQ_JOIN);
 
@@ -175,7 +187,9 @@ int ABT_finalize(void)
                   p_thread->unit_def.p_last_xstream->rank);
 
         /* Switch to the parent */
-        ABTI_thread_context_switch_to_parent(&p_local_xstream, p_thread);
+        ABTI_thread_context_switch_to_parent(&p_local_xstream, p_thread,
+                                             ABT_SYNC_EVENT_TYPE_XSTREAM_JOIN,
+                                             (void *)p_local_xstream);
 
         /* Back to the original thread */
         LOG_DEBUG("[U%" PRIu64 ":E%d] resume after yield\n",

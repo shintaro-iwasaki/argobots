@@ -13,6 +13,8 @@ void ABTD_thread_func_wrapper(void *p_arg)
     ABTD_thread_context *p_ctx = (ABTD_thread_context *)p_arg;
     ABTI_thread *p_thread = ABTI_thread_context_get_thread(p_ctx);
     ABTI_xstream *p_local_xstream = p_thread->unit_def.p_last_xstream;
+    ABTI_tool_event_thread_run(p_thread, p_local_xstream,
+                               p_local_xstream->p_unit);
     p_local_xstream->p_unit = &p_thread->unit_def;
 
     p_thread->unit_def.f_unit(p_thread->unit_def.p_arg);
@@ -49,6 +51,7 @@ static inline void ABTD_thread_terminate(ABTI_xstream *p_local_xstream,
                       p_thread->unit_def.p_last_xstream->rank);
 
             /* Note that a parent ULT cannot be a joiner. */
+            ABTI_tool_event_thread_resume(p_joiner, p_local_xstream);
             ABTI_thread_finish_context_to_sibling(p_local_xstream, p_thread,
                                                   p_joiner);
             return;
@@ -126,6 +129,9 @@ void ABTD_thread_cancel(ABTI_xstream *p_local_xstream, ABTI_thread *p_thread)
             ABTI_thread_set_ready(p_local_xstream, p_joiner);
         }
     }
+    /* This path is taken when threads do not finish by finish_context.  Let's
+     * invoke the finish-thread event. */
+    ABTI_tool_event_thread_finish(p_thread, p_local_xstream);
 }
 
 void ABTD_thread_print_context(ABTI_thread *p_thread, FILE *p_os, int indent)

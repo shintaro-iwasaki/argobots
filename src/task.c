@@ -205,7 +205,8 @@ int ABT_task_free(ABT_task *task)
         }
 #endif
         ABTI_thread_yield(&p_local_xstream,
-                          ABTI_unit_get_thread(p_local_xstream->p_unit));
+                          ABTI_unit_get_thread(p_local_xstream->p_unit),
+                          ABT_SYNC_EVENT_TYPE_TASK_JOIN, (void *)p_task);
     }
 
     /* Free the ABTI_task structure */
@@ -252,7 +253,8 @@ int ABT_task_join(ABT_task task)
         }
 #endif
         ABTI_thread_yield(&p_local_xstream,
-                          ABTI_unit_get_thread(p_local_xstream->p_unit));
+                          ABTI_unit_get_thread(p_local_xstream->p_unit),
+                          ABT_SYNC_EVENT_TYPE_TASK_JOIN, (void *)p_task);
     }
 
 fn_exit:
@@ -785,6 +787,7 @@ static int ABTI_task_create(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
     p_newtask->unit_def.type = ABTI_UNIT_TYPE_TASK;
     p_newtask->unit_def.unit = p_pool->u_create_from_task(h_newtask);
 
+    ABTI_tool_event_task_create(p_newtask, p_local_xstream, p_pool);
     LOG_DEBUG("[T%" PRIu64 "] created\n", ABTI_task_get_id(p_newtask));
 
     /* Add this task to the scheduler's pool */
@@ -842,6 +845,7 @@ static int ABTI_task_revive(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
         p_task->unit_def.unit = p_pool->u_create_from_task(task);
     }
 
+    ABTI_tool_event_task_revive(p_task, p_local_xstream, p_pool);
     LOG_DEBUG("[T%" PRIu64 "] revived\n", ABTI_task_get_id(p_task));
 
     /* Add this task to the scheduler's pool */
@@ -863,6 +867,7 @@ fn_fail:
 
 void ABTI_task_free(ABTI_xstream *p_local_xstream, ABTI_task *p_task)
 {
+    ABTI_tool_event_task_free(p_task, p_local_xstream);
     LOG_DEBUG("[T%" PRIu64 "] freed\n", ABTI_task_get_id(p_task));
 
     /* Free the unit */
