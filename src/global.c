@@ -170,11 +170,10 @@ int ABT_finalize(void)
                         ABT_ERR_INV_XSTREAM,
                         "ABT_finalize must be called by the primary ES.");
 
-    ABTI_thread *p_self = p_local_xstream->p_thread;
-    ABTI_CHECK_TRUE_MSG(p_self->type == ABTI_THREAD_TYPE_THREAD_MAIN,
+    ABTI_thread *p_thread = p_local_xstream->p_thread;
+    ABTI_CHECK_TRUE_MSG(p_thread->type == ABTI_THREAD_TYPE_THREAD_MAIN,
                         ABT_ERR_INV_THREAD,
                         "ABT_finalize must be called by the primary ULT.");
-    ABTI_thread *p_thread = ABTI_thread_get_thread(p_self);
 
 #ifndef ABT_CONFIG_DISABLE_TOOL_INTERFACE
     /* Turns off the tool interface */
@@ -206,7 +205,7 @@ int ABT_finalize(void)
     }
 
     /* Remove the primary ULT */
-    ABTI_ASSERT(p_local_xstream->p_thread == p_self);
+    ABTI_ASSERT(p_local_xstream->p_thread == p_thread);
     p_local_xstream->p_thread = NULL;
     ABTI_thread_free_main(p_local_xstream, p_thread);
 

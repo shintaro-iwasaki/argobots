@@ -448,7 +448,7 @@ static ABT_thread unit_get_thread(ABT_unit unit)
     ABT_thread h_thread;
     unit_t *p_unit = (unit_t *)unit;
     if (ABTI_thread_type_is_thread(p_unit->type)) {
-        h_thread = ABTI_thread_get_handle(ABTI_thread_get_thread(p_unit));
+        h_thread = ABTI_thread_get_handle(p_unit);
     } else {
         h_thread = ABT_THREAD_NULL;
     }
@@ -460,7 +460,7 @@ static ABT_task unit_get_task(ABT_unit unit)
     ABT_task h_task;
     unit_t *p_unit = (unit_t *)unit;
     if (p_unit->type == ABTI_THREAD_TYPE_TASK) {
-        h_task = ABTI_task_get_handle(ABTI_thread_get_task(p_unit));
+        h_task = ABTI_task_get_handle(p_unit);
     } else {
         h_task = ABT_TASK_NULL;
     }

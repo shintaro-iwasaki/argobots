@@ -57,7 +57,7 @@ static inline ABTI_sched *ABTI_xstream_get_top_sched(ABTI_xstream *p_xstream)
     ABTI_thread *p_thread = p_xstream->p_thread;
     while (p_thread) {
         if (ABTI_thread_type_is_thread(p_thread->type)) {
-            ABTI_sched *p_sched = ABTI_thread_get_thread(p_thread)->p_sched;
+            ABTI_sched *p_sched = p_thread->p_sched;
             if (p_sched)
                 return p_sched;
         }

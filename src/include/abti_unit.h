@@ -74,16 +74,6 @@ static inline ABT_unit_type ABTI_thread_type_get_type(ABTI_thread_type type)
     }
 }
 
-static inline ABTI_thread *ABTI_thread_get_thread(ABTI_thread *p_thread)
-{
-    return p_thread;
-}
-
-static inline ABTI_thread *ABTI_thread_get_task(ABTI_thread *p_thread)
-{
-    return p_thread;
-}
-
 static inline void ABTI_thread_set_specific(ABTI_xstream *p_local_xstream,
                                             ABTI_thread *p_thread,
                                             ABTI_key *p_key, void *value)

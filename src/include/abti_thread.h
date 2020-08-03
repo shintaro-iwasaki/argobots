@@ -169,7 +169,7 @@ static inline ABTI_thread *ABTI_thread_context_switch_to_sibling_internal(
         ABTI_thread *p_prev = p_local_xstream->p_thread;
         p_local_xstream->p_thread = p_old;
         ABTI_ASSERT(ABTI_thread_type_is_thread(p_prev->type));
-        return ABTI_thread_get_thread(p_prev);
+        return p_prev;
     }
 }
 
@@ -178,7 +178,7 @@ static inline ABTI_thread *ABTI_thread_context_switch_to_parent_internal(
     ABT_sync_event_type sync_event_type, void *p_sync)
 {
     ABTI_ASSERT(ABTI_thread_type_is_thread(p_old->type));
-    ABTI_thread *p_new = ABTI_thread_get_thread(p_old->p_parent);
+    ABTI_thread *p_new = p_old->p_parent;
 #if ABT_CONFIG_THREAD_TYPE == ABT_THREAD_TYPE_DYNAMIC_PROMOTION
     /* Dynamic promotion is unnecessary if p_old will be discarded. */
     if (!is_finish && !ABTI_thread_is_dynamic_promoted(p_old))
@@ -203,7 +203,7 @@ static inline ABTI_thread *ABTI_thread_context_switch_to_parent_internal(
         /* Invoke an event of thread run. */
         ABTI_tool_event_thread_run(p_local_xstream, p_old, p_prev,
                                    p_old->p_parent);
-        return ABTI_thread_get_thread(p_prev);
+        return p_prev;
     }
 }
 
@@ -232,9 +232,8 @@ static inline ABTI_thread *ABTI_thread_context_switch_to_child_internal(
          * so it must be done here. */
         p_local_xstream = ABTI_local_get_xstream_uninlined();
         *pp_local_xstream = p_local_xstream;
-        ABTI_thread *p_prev_unit = p_local_xstream->p_thread;
-        ABTI_ASSERT(ABTI_thread_type_is_thread(p_prev_unit->type));
-        ABTI_thread *p_prev = ABTI_thread_get_thread(p_prev_unit);
+        ABTI_thread *p_prev = p_local_xstream->p_thread;
+        ABTI_ASSERT(ABTI_thread_type_is_thread(p_prev->type));
         p_local_xstream->p_thread = p_old;
         if (!ABTI_thread_is_dynamic_promoted(p_prev)) {
             ABTI_ASSERT(p_prev == p_new);
@@ -287,7 +286,7 @@ static inline ABTI_thread *ABTI_thread_context_switch_to_child_internal(
         p_local_xstream->p_thread = p_old;
         ABTI_ASSERT(ABTI_thread_type_is_thread(p_prev->type));
         /* p_old keeps running as a parent, so no thread-run event incurs. */
-        return ABTI_thread_get_thread(p_prev);
+        return p_prev;
     }
 }
 

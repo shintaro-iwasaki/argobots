@@ -187,7 +187,7 @@ ABTI_thread *ABTI_thread_htable_pop(ABTI_thread_htable *p_htable,
             p_queue->head = NULL;
             p_queue->tail = NULL;
         } else {
-            p_queue->head = ABTI_thread_get_thread(p_thread->p_next);
+            p_queue->head = p_thread->p_next;
         }
 
         p_queue->num_threads--;
@@ -210,7 +210,7 @@ ABTI_thread *ABTI_thread_htable_pop_low(ABTI_thread_htable *p_htable,
             p_queue->low_head = NULL;
             p_queue->low_tail = NULL;
         } else {
-            p_queue->low_head = ABTI_thread_get_thread(p_thread->p_next);
+            p_queue->low_head = p_thread->p_next;
         }
 
         p_queue->low_num_threads--;
@@ -244,7 +244,7 @@ ABT_bool ABTI_thread_htable_switch_low(ABTI_xstream **pp_local_xstream,
             p_queue->low_head = p_thread;
             p_queue->low_tail = p_thread;
         } else {
-            p_queue->low_head = ABTI_thread_get_thread(p_target->p_next);
+            p_queue->low_head = p_target->p_next;
             p_queue->low_tail->p_next = p_thread;
             p_queue->low_tail = p_thread;
         }

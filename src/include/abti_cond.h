@@ -66,9 +66,8 @@ static inline int ABTI_cond_wait(ABTI_xstream **pp_local_xstream,
     ABTI_thread *p_thread;
 
     if (p_local_xstream != NULL) {
-        ABTI_thread *p_self = p_local_xstream->p_thread;
-        ABTI_CHECK_TRUE(ABTI_thread_type_is_thread(p_self->type), ABT_ERR_COND);
-        p_thread = ABTI_thread_get_thread(p_self);
+        p_thread = p_local_xstream->p_thread;
+        ABTI_CHECK_TRUE(ABTI_thread_type_is_thread(p_thread->type), ABT_ERR_COND);
     } else {
         /* external thread */
         p_thread = (ABTI_thread *)ABTU_calloc(1, sizeof(ABTI_thread));

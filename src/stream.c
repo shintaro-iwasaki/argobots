@@ -489,7 +489,7 @@ int ABT_xstream_exit(void)
             continue;
         }
 #endif
-        ABTI_thread_yield(&p_local_xstream, ABTI_thread_get_thread(p_self),
+        ABTI_thread_yield(&p_local_xstream, p_self,
                           ABT_SYNC_EVENT_TYPE_OTHER, NULL);
     } while (ABTD_atomic_acquire_load_int(&p_local_xstream->state) !=
              ABT_XSTREAM_STATE_TERMINATED);
@@ -1247,7 +1247,7 @@ int ABTI_xstream_join(ABTI_xstream **pp_local_xstream, ABTI_xstream *p_xstream)
     if (p_local_xstream) {
         ABTI_thread *p_self = p_local_xstream->p_thread;
         if (ABTI_thread_type_is_thread(p_self->type)) {
-            p_thread = ABTI_thread_get_thread(p_self);
+            p_thread = p_self;
         }
     }
 
@@ -1452,7 +1452,7 @@ int ABTI_xstream_schedule_thread(ABTI_xstream **pp_local_xstream,
     LOG_DEBUG("[U%" PRIu64 ":E%d] start running\n",
               ABTI_thread_get_id(p_thread), p_local_xstream->rank);
 
-    ABTI_thread *p_self = ABTI_thread_get_thread(p_local_xstream->p_thread);
+    ABTI_thread *p_self = p_local_xstream->p_thread;
     p_thread =
         ABTI_thread_context_switch_to_child(pp_local_xstream, p_self, p_thread);
     /* The previous ULT (p_thread) may not be the same as one to which the
@@ -1692,7 +1692,7 @@ int ABTI_xstream_update_main_sched(ABTI_xstream **pp_local_xstream,
     }
 
     /* If the ES has a main scheduler, we have to free it */
-    p_thread = ABTI_thread_get_thread((*pp_local_xstream)->p_thread);
+    p_thread = (*pp_local_xstream)->p_thread;
     p_tar_pool = ABTI_pool_get_ptr(p_sched->pools[0]);
 
     /* If the caller ULT is associated with a pool of the current main

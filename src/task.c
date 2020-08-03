@@ -204,8 +204,7 @@ int ABT_task_free(ABT_task *task)
             continue;
         }
 #endif
-        ABTI_thread_yield(&p_local_xstream,
-                          ABTI_thread_get_thread(p_local_xstream->p_thread),
+        ABTI_thread_yield(&p_local_xstream, p_local_xstream->p_thread,
                           ABT_SYNC_EVENT_TYPE_TASK_JOIN, (void *)p_task);
     }
     ABTI_tool_event_task_join(p_local_xstream, p_task,
@@ -254,8 +253,7 @@ int ABT_task_join(ABT_task task)
             continue;
         }
 #endif
-        ABTI_thread_yield(&p_local_xstream,
-                          ABTI_thread_get_thread(p_local_xstream->p_thread),
+        ABTI_thread_yield(&p_local_xstream, p_local_xstream->p_thread,
                           ABT_SYNC_EVENT_TYPE_TASK_JOIN, (void *)p_task);
     }
     ABTI_tool_event_task_join(p_local_xstream, p_task,
@@ -336,7 +334,7 @@ int ABT_task_self(ABT_task *task)
 
     ABTI_thread *p_thread = p_local_xstream->p_thread;
     if (p_thread->type == ABTI_THREAD_TYPE_TASK) {
-        *task = ABTI_task_get_handle(ABTI_thread_get_task(p_thread));
+        *task = ABTI_task_get_handle(p_thread);
     } else {
         abt_errno = ABT_ERR_INV_TASK;
         *task = ABT_TASK_NULL;
@@ -379,7 +377,7 @@ int ABT_task_self_id(ABT_unit_id *id)
 
     ABTI_thread *p_thread = p_local_xstream->p_thread;
     if (p_thread->type == ABTI_THREAD_TYPE_TASK) {
-        *id = ABTI_task_get_id(ABTI_thread_get_task(p_thread));
+        *id = ABTI_task_get_id(p_thread);
     } else {
         abt_errno = ABT_ERR_INV_TASK;
     }
