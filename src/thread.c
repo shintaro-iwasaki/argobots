@@ -450,7 +450,6 @@ int ABT_thread_exit(void)
     ABTI_thread *p_thread = p_local_xstream->p_thread;
     ABTI_CHECK_TRUE(ABTI_thread_type_is_thread(p_thread->type),
                     ABT_ERR_INV_THREAD);
-    ABTI_thread *p_thread = ABTI_thread_get_thread(p_thread);
 
     /* Set the exit request */
     ABTI_thread_set_request(p_thread, ABTI_THREAD_REQ_EXIT);
