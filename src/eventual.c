@@ -114,18 +114,18 @@ int ABT_eventual_wait(ABT_eventual eventual, void **value)
         ABTI_thread *p_unit;
 
         if (p_local_xstream != NULL) {
-            p_unit = p_local_xstream->p_unit;
-            ABTI_CHECK_TRUE(ABTI_unit_type_is_thread(p_unit->type),
+            p_unit = p_local_xstream->p_thread;
+            ABTI_CHECK_TRUE(ABTI_thread_type_is_thread(p_unit->type),
                             ABT_ERR_EVENTUAL);
-            p_current = ABTI_unit_get_thread(p_unit);
+            p_current = ABTI_thread_get_thread(p_unit);
         } else {
             /* external thread */
             p_current = NULL;
             p_unit = (ABTI_thread *)ABTU_calloc(1, sizeof(ABTI_thread));
-            p_unit->type = ABTI_UNIT_TYPE_EXT;
+            p_unit->type = ABTI_THREAD_TYPE_EXT;
             /* use state for synchronization */
             ABTD_atomic_relaxed_store_int(&p_unit->state,
-                                          ABTI_UNIT_STATE_BLOCKED);
+                                          ABTI_THREAD_STATE_BLOCKED);
         }
 
         p_unit->p_next = NULL;
@@ -152,7 +152,7 @@ int ABT_eventual_wait(ABT_eventual eventual, void **value)
 
             /* External thread is waiting here. */
             while (ABTD_atomic_acquire_load_int(&p_unit->state) !=
-                   ABTI_UNIT_STATE_READY)
+                   ABTI_THREAD_STATE_READY)
                 ;
             ABTU_free(p_unit);
         }
@@ -253,13 +253,13 @@ int ABT_eventual_set(ABT_eventual eventual, void *value, int nbytes)
         ABTI_thread *p_next = p_unit->p_next;
         p_unit->p_next = NULL;
 
-        if (ABTI_unit_type_is_thread(p_unit->type)) {
-            ABTI_thread *p_thread = ABTI_unit_get_thread(p_unit);
+        if (ABTI_thread_type_is_thread(p_unit->type)) {
+            ABTI_thread *p_thread = ABTI_thread_get_thread(p_unit);
             ABTI_thread_set_ready(p_local_xstream, p_thread);
         } else {
             /* When the head is an external thread */
             ABTD_atomic_release_store_int(&p_unit->state,
-                                          ABTI_UNIT_STATE_READY);
+                                          ABTI_THREAD_STATE_READY);
         }
 
         /* Next ULT */
