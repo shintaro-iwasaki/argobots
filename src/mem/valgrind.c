@@ -41,7 +41,7 @@ void ABTI_valgrind_register_stack(const void *p_stack, size_t size)
     ABTI_valgrind_id valgrind_id = VALGRIND_STACK_REGISTER(p_start, p_end);
     ABTI_valgrind_id_list *p_valgrind_id_list =
         (ABTI_valgrind_id_list *)malloc(sizeof(ABTI_valgrind_id_list));
-    p_valgrind_id_list->p_stack = p_stack;
+    p_valgrind_id_list->ctx.p_stack = p_stack;
     p_valgrind_id_list->valgrind_id = valgrind_id;
     p_valgrind_id_list->p_next = 0;
     if (!gp_valgrind_id_list_head) {
@@ -62,7 +62,7 @@ void ABTI_valgrind_unregister_stack(const void *p_stack)
         return;
 
     ABTI_spinlock_acquire(&g_valgrind_id_list_lock);
-    if (gp_valgrind_id_list_head->p_stack == p_stack) {
+    if (gp_valgrind_id_list_head->ctx.p_stack == p_stack) {
         VALGRIND_STACK_DEREGISTER(gp_valgrind_id_list_head->valgrind_id);
         ABTI_valgrind_id_list *p_next = gp_valgrind_id_list_head->p_next;
         free(gp_valgrind_id_list_head);
@@ -75,7 +75,7 @@ void ABTI_valgrind_unregister_stack(const void *p_stack)
         ABTI_valgrind_id_list *p_current = gp_valgrind_id_list_head->p_next;
         ABT_bool deregister_flag = ABT_FALSE;
         while (p_current) {
-            if (p_current->p_stack == p_stack) {
+            if (p_current->ctx.p_stack == p_stack) {
                 LOG_DEBUG("valgrind : deregister stack %p (id = %d)\n", p_stack,
                           (int)p_current->valgrind_id);
                 VALGRIND_STACK_DEREGISTER(p_current->valgrind_id);
