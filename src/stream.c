@@ -489,8 +489,8 @@ int ABT_xstream_exit(void)
             continue;
         }
 #endif
-        ABTI_thread_yield(&p_local_xstream, p_self,
-                          ABT_SYNC_EVENT_TYPE_OTHER, NULL);
+        ABTI_thread_yield(&p_local_xstream, p_self, ABT_SYNC_EVENT_TYPE_OTHER,
+                          NULL);
     } while (ABTD_atomic_acquire_load_int(&p_local_xstream->state) !=
              ABT_XSTREAM_STATE_TERMINATED);
 

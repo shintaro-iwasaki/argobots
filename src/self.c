@@ -233,7 +233,8 @@ int ABT_self_suspend(void)
     abt_errno = ABTI_thread_set_blocked(p_self);
     ABTI_CHECK_ERROR(abt_errno);
 
-    ABTI_thread_suspend(&p_local_xstream, p_self, ABT_SYNC_EVENT_TYPE_USER, NULL);
+    ABTI_thread_suspend(&p_local_xstream, p_self, ABT_SYNC_EVENT_TYPE_USER,
+                        NULL);
 
 fn_exit:
     return abt_errno;
