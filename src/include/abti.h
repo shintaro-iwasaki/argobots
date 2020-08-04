@@ -461,8 +461,6 @@ int ABTI_xstream_run_unit(ABTI_xstream **pp_local_xstream, ABT_unit unit,
                           ABTI_pool *p_pool);
 int ABTI_xstream_schedule_thread(ABTI_xstream **pp_local_xstream,
                                  ABTI_thread *p_thread);
-void ABTI_xstream_schedule_task(ABTI_xstream *p_local_xstream,
-                                ABTI_thread *p_task);
 int ABTI_xstream_migrate_thread(ABTI_xstream *p_local_xstream,
                                 ABTI_thread *p_thread);
 int ABTI_xstream_init_main_sched(ABTI_xstream *p_xstream, ABTI_sched *p_sched);

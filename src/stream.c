@@ -999,23 +999,21 @@ int ABTI_xstream_run_unit(ABTI_xstream **pp_local_xstream, ABT_unit unit,
 
     ABT_unit_type type = p_pool->u_get_type(unit);
 
+    ABTI_thread *p_thread;
     if (type == ABT_UNIT_TYPE_THREAD) {
         ABT_thread thread = p_pool->u_get_thread(unit);
-        ABTI_thread *p_thread = ABTI_thread_get_ptr(thread);
-        /* Switch the context */
-        abt_errno = ABTI_xstream_schedule_thread(pp_local_xstream, p_thread);
-        ABTI_CHECK_ERROR(abt_errno);
+        p_thread = ABTI_thread_get_ptr(thread);
 
     } else if (type == ABT_UNIT_TYPE_TASK) {
         ABT_task task = p_pool->u_get_task(unit);
-        ABTI_thread *p_task = ABTI_task_get_ptr(task);
-        /* Execute the task */
-        ABTI_xstream_schedule_task(*pp_local_xstream, p_task);
-
+        p_thread = ABTI_task_get_ptr(task);
     } else {
         HANDLE_ERROR("Not supported type!");
         ABTI_CHECK_TRUE(0, ABT_ERR_INV_UNIT);
     }
+    /* Execute the context */
+    abt_errno = ABTI_xstream_schedule_thread(pp_local_xstream, p_thread);
+    ABTI_CHECK_ERROR(abt_errno);
 
 fn_exit:
     return abt_errno;
@@ -1425,11 +1423,17 @@ int ABTI_xstream_schedule_thread(ABTI_xstream **pp_local_xstream,
 #ifndef ABT_CONFIG_DISABLE_THREAD_CANCEL
     if (ABTD_atomic_acquire_load_uint32(&p_thread->request) &
         ABTI_THREAD_REQ_CANCEL) {
-        LOG_DEBUG("[U%" PRIu64 ":E%d] canceled\n", ABTI_thread_get_id(p_thread),
-                  p_local_xstream->rank);
-        ABTD_thread_cancel(p_local_xstream, p_thread);
-        ABTI_xstream_terminate_thread(p_local_xstream, p_thread);
-        goto fn_exit;
+        if (ABTI_thread_type_is_thread(p_thread->type)) {
+            LOG_DEBUG("[U%" PRIu64 ":E%d] canceled\n", ABTI_thread_get_id(p_thread),
+                      p_local_xstream->rank);
+            ABTD_thread_cancel(p_local_xstream, p_thread);
+            ABTI_xstream_terminate_thread(p_local_xstream, p_thread);
+            goto fn_exit;
+        } else {
+            ABTI_tool_event_task_cancel(p_local_xstream, p_thread);
+            ABTI_xstream_terminate_task(p_local_xstream, p_thread);
+            goto fn_exit;
+        }
     }
 #endif
 
@@ -1453,21 +1457,34 @@ int ABTI_xstream_schedule_thread(ABTI_xstream **pp_local_xstream,
               ABTI_thread_get_id(p_thread), p_local_xstream->rank);
 
     ABTI_thread *p_self = p_local_xstream->p_thread;
-    p_thread =
-        ABTI_thread_context_switch_to_child(pp_local_xstream, p_self, p_thread);
-    /* The previous ULT (p_thread) may not be the same as one to which the
-     * context has been switched. */
-    /* The scheduler continues from here. */
-    p_local_xstream = *pp_local_xstream;
+    uint32_t request;
+    if (ABTI_thread_type_is_thread(p_thread->type)) {
+        p_thread =
+            ABTI_thread_context_switch_to_child(pp_local_xstream, p_self, p_thread);
+        /* The previous ULT (p_thread) may not be the same as one to which the
+         * context has been switched. */
+        /* The scheduler continues from here. */
+        p_local_xstream = *pp_local_xstream;
+        request = ABTD_atomic_acquire_load_uint32(&p_thread->request);
+    } else {
+        p_local_xstream->p_thread = p_thread;
+        p_thread->p_parent = p_self;
+        /* Execute the task function */
+        ABTI_tool_event_task_run(p_local_xstream, p_thread, p_self);
+        p_thread->f_thread(p_thread->p_arg);
+        ABTI_tool_event_task_finish(p_local_xstream, p_thread, p_self);
+        /* Set the current running scheduler's unit */
+        p_local_xstream->p_thread = p_self;
+        ABTD_atomic_relaxed_store_uint32(&p_thread->request, ABTI_THREAD_REQ_TERMINATE);
+        request = ABTI_THREAD_REQ_TERMINATE;
+    }
 
     LOG_DEBUG("[U%" PRIu64 ":E%d] stopped\n", ABTI_thread_get_id(p_thread),
               p_local_xstream->rank);
-
     /* Request handling. */
     /* We do not need to acquire-load request since all critical requests
      * (BLOCK, ORPHAN, STOP, and NOPUSH) are written by p_thread. CANCEL might
      * be delayed. */
-    uint32_t request = ABTD_atomic_acquire_load_uint32(&p_thread->request);
     if (request & ABTI_THREAD_REQ_STOP) {
         /* The ULT has completed its execution or it called the exit request. */
         LOG_DEBUG("[U%" PRIu64 ":E%d] %s\n", ABTI_thread_get_id(p_thread),
@@ -1524,48 +1541,6 @@ fn_exit:
 fn_fail:
     HANDLE_ERROR_FUNC_WITH_CODE(abt_errno);
     goto fn_exit;
-}
-
-void ABTI_xstream_schedule_task(ABTI_xstream *p_local_xstream,
-                                ABTI_thread *p_task)
-{
-#ifndef ABT_CONFIG_DISABLE_TASK_CANCEL
-    if (ABTD_atomic_acquire_load_uint32(&p_task->request) &
-        ABTI_THREAD_REQ_CANCEL) {
-        ABTI_tool_event_task_cancel(p_local_xstream, p_task);
-        ABTI_xstream_terminate_task(p_local_xstream, p_task);
-        return;
-    }
-#endif
-
-    /* Change the task state */
-    ABTD_atomic_release_store_int(&p_task->state, ABTI_THREAD_STATE_RUNNING);
-
-    /* Set the associated ES */
-    p_task->p_last_xstream = p_local_xstream;
-
-    /* Execute the task function */
-    LOG_DEBUG("[T%" PRIu64 ":E%d] running\n", ABTI_task_get_id(p_task),
-              p_local_xstream->rank);
-
-    ABTI_thread *p_sched_unit = p_local_xstream->p_thread;
-    p_local_xstream->p_thread = p_task;
-    p_task->p_parent = p_sched_unit;
-
-    /* Execute the task function */
-    ABTI_tool_event_task_run(p_local_xstream, p_task, p_sched_unit);
-    LOG_DEBUG("[T%" PRIu64 ":E%d] running\n", ABTI_task_get_id(p_task),
-              p_local_xstream->rank);
-    p_task->f_thread(p_task->p_arg);
-    ABTI_tool_event_task_finish(p_local_xstream, p_task, p_sched_unit);
-    LOG_DEBUG("[T%" PRIu64 ":E%d] stopped\n", ABTI_task_get_id(p_task),
-              p_local_xstream->rank);
-
-    /* Set the current running scheduler's unit */
-    p_local_xstream->p_thread = p_sched_unit;
-
-    /* Terminate the tasklet */
-    ABTI_xstream_terminate_task(p_local_xstream, p_task);
 }
 
 int ABTI_xstream_migrate_thread(ABTI_xstream *p_local_xstream,

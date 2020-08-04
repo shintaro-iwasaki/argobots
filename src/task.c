@@ -286,7 +286,7 @@ int ABT_task_cancel(ABT_task task)
     ABTI_CHECK_NULL_TASK_PTR(p_task);
 
     /* Set the cancel request */
-    ABTI_task_set_request(p_task, ABTI_THREAD_REQ_CANCEL);
+    ABTI_thread_set_request(p_task, ABTI_THREAD_REQ_CANCEL);
 
 fn_exit:
     return abt_errno;
@@ -778,6 +778,9 @@ static int ABTI_task_create(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
     p_newtask->p_arg = arg;
     p_newtask->p_pool = p_pool;
     p_newtask->refcount = refcount;
+#ifndef ABT_CONFIG_DISABLE_STACKABLE_SCHED
+    p_newtask->p_sched = NULL;
+#endif
     ABTD_atomic_relaxed_store_ptr(&p_newtask->p_keytable, NULL);
 #ifndef ABT_CONFIG_DISABLE_MIGRATION
     p_newtask->migratable = ABT_TRUE;
