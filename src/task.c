@@ -209,7 +209,7 @@ int ABT_task_free(ABT_task *task)
                               p_local_xstream ? p_local_xstream->p_thread
                                               : NULL);
     /* Free the ABTI_thread structure */
-    ABTI_task_free(p_local_xstream, p_task);
+    ABTI_thread_free_task(p_local_xstream, p_task);
 
     /* Return value */
     *task = ABT_TASK_NULL;
@@ -754,27 +754,6 @@ fn_fail:
 /*****************************************************************************/
 /* Private APIs                                                              */
 /*****************************************************************************/
-
-void ABTI_task_free(ABTI_xstream *p_local_xstream, ABTI_thread *p_task)
-{
-    ABTI_tool_event_task_free(p_local_xstream, p_task,
-                              p_local_xstream ? p_local_xstream->p_thread
-                                              : NULL);
-    LOG_DEBUG("[T%" PRIu64 "] freed\n", ABTI_task_get_id(p_task));
-
-    /* Free the unit */
-    p_task->p_pool->u_free(&p_task->unit);
-
-    /* Free the key-value table */
-    ABTI_ktable *p_ktable = ABTD_atomic_acquire_load_ptr(&p_task->p_keytable);
-    /* No parallel access to TLS is allowed. */
-    ABTI_ASSERT(p_ktable != ABTI_KTABLE_LOCKED);
-    if (p_ktable) {
-        ABTI_ktable_free(p_local_xstream, p_ktable);
-    }
-
-    ABTI_mem_free_task(p_local_xstream, p_task);
-}
 
 void ABTI_task_print(ABTI_thread *p_task, FILE *p_os, int indent)
 {

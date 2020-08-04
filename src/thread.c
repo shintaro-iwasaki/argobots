@@ -1758,6 +1758,18 @@ void ABTI_thread_free(ABTI_xstream *p_local_xstream, ABTI_thread *p_thread)
     ABTI_mem_free_thread(p_local_xstream, p_thread);
 }
 
+void ABTI_thread_free_task(ABTI_xstream *p_local_xstream, ABTI_thread *p_thread)
+{
+    ABTI_tool_event_task_free(p_local_xstream, p_thread,
+                              p_local_xstream ? p_local_xstream->p_thread
+                                              : NULL);
+    LOG_DEBUG("[U%" PRIu64 "] freed\n", ABTI_task_get_id(p_thread));
+
+    ABTI_thread_free_internal(p_local_xstream, p_thread);
+
+    ABTI_mem_free_task(p_local_xstream, p_thread);
+}
+
 void ABTI_thread_free_main(ABTI_xstream *p_local_xstream, ABTI_thread *p_thread)
 {
     LOG_DEBUG("[U%" PRIu64 ":E%d] main ULT freed\n",

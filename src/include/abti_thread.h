@@ -460,7 +460,7 @@ ABTI_thread_create_internal(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
                            ABTI_self_get_native_thread_id(p_local_xstream));
         if (abt_errno != ABT_SUCCESS) {
             if (unit_type == ABTI_THREAD_TYPE_THREAD_MAIN) {
-                ABTI_task_free(p_local_xstream, p_newthread);
+                ABTI_thread_free_task(p_local_xstream, p_newthread);
             } else if (unit_type == ABTI_THREAD_TYPE_THREAD_MAIN) {
                 ABTI_thread_free_main(p_local_xstream, p_newthread);
             } else if (unit_type == ABTI_THREAD_TYPE_THREAD_MAIN_SCHED) {

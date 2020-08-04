@@ -111,7 +111,7 @@ static inline void ABTI_xstream_terminate_task(ABTI_xstream *p_local_xstream,
     if (p_task->refcount == 0) {
         ABTD_atomic_release_store_int(&p_task->state,
                                       ABTI_THREAD_STATE_TERMINATED);
-        ABTI_task_free(p_local_xstream, p_task);
+        ABTI_thread_free_task(p_local_xstream, p_task);
     } else {
         /* NOTE: We set the task's state as TERMINATED after checking refcount
          * because the task can be freed on a different ES.  In other words, we
