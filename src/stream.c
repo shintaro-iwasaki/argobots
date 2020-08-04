@@ -1423,17 +1423,15 @@ int ABTI_xstream_schedule_thread(ABTI_xstream **pp_local_xstream,
 #ifndef ABT_CONFIG_DISABLE_THREAD_CANCEL
     if (ABTD_atomic_acquire_load_uint32(&p_thread->request) &
         ABTI_THREAD_REQ_CANCEL) {
+        LOG_DEBUG("[U%" PRIu64 ":E%d] canceled\n", ABTI_thread_get_id(p_thread),
+                  p_local_xstream->rank);
         if (ABTI_thread_type_is_thread(p_thread->type)) {
-            LOG_DEBUG("[U%" PRIu64 ":E%d] canceled\n",
-                      ABTI_thread_get_id(p_thread), p_local_xstream->rank);
             ABTD_thread_cancel(p_local_xstream, p_thread);
-            ABTI_xstream_terminate_thread(p_local_xstream, p_thread);
-            goto fn_exit;
         } else {
             ABTI_tool_event_task_cancel(p_local_xstream, p_thread);
-            ABTI_xstream_terminate_task(p_local_xstream, p_thread);
-            goto fn_exit;
         }
+        ABTI_xstream_terminate_thread(p_local_xstream, p_thread);
+        goto fn_exit;
     }
 #endif
 

@@ -103,25 +103,6 @@ static inline void ABTI_xstream_terminate_thread(ABTI_xstream *p_local_xstream,
     }
 }
 
-static inline void ABTI_xstream_terminate_task(ABTI_xstream *p_local_xstream,
-                                               ABTI_thread *p_task)
-{
-    LOG_DEBUG("[T%" PRIu64 ":E%d] terminated\n", ABTI_task_get_id(p_task),
-              p_task->p_last_xstream->rank);
-    if (p_task->refcount == 0) {
-        ABTD_atomic_release_store_int(&p_task->state,
-                                      ABTI_THREAD_STATE_TERMINATED);
-        ABTI_thread_free_task(p_local_xstream, p_task);
-    } else {
-        /* NOTE: We set the task's state as TERMINATED after checking refcount
-         * because the task can be freed on a different ES.  In other words, we
-         * must not access any field of p_task after changing the state to
-         * TERMINATED. */
-        ABTD_atomic_release_store_int(&p_task->state,
-                                      ABTI_THREAD_STATE_TERMINATED);
-    }
-}
-
 /* Get the native thread id associated with the target xstream. */
 static inline ABTI_native_thread_id
 ABTI_xstream_get_native_thread_id(ABTI_xstream *p_xstream)
