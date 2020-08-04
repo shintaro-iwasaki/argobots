@@ -619,6 +619,7 @@ void ABTI_info_check_print_all_thread_stacks(void);
 #include "abti_stream.h"
 #include "abti_self.h"
 #include "abti_tool.h"
+#include "abti_mem.h"
 #include "abti_thread.h"
 #include "abti_thread_attr.h"
 #include "abti_task.h"
@@ -630,7 +631,6 @@ void ABTI_info_check_print_all_thread_stacks(void);
 #include "abti_future.h"
 #include "abti_barrier.h"
 #include "abti_timer.h"
-#include "abti_mem.h"
 #include "abti_key.h"
 
 #endif /* ABTI_H_INCLUDED */

@@ -351,6 +351,142 @@ ABTI_thread_finish_context_sched_to_main_thread(ABTI_sched *p_main_sched)
                                &p_main_thread->ctx.ctx);
 }
 
+static inline int
+ABTI_thread_create_internal(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
+                            void (*thread_func)(void *), void *arg,
+                            ABTI_thread_attr *p_attr,
+                            ABTI_thread_type unit_type, ABTI_sched *p_sched,
+                            int refcount, ABTI_xstream *p_parent_xstream,
+                            ABT_bool push_pool, ABTI_thread **pp_newthread)
+{
+    int abt_errno = ABT_SUCCESS;
+    ABTI_thread *p_newthread;
+
+    /* Allocate a ULT object and its stack, then create a thread context. */
+    if (unit_type == ABTI_THREAD_TYPE_TASK) {
+        p_newthread = ABTI_mem_alloc_task(p_local_xstream);
+    } else {
+        p_newthread = ABTI_mem_alloc_thread(p_local_xstream, p_attr);
+    }
+    if ((unit_type == ABTI_THREAD_TYPE_THREAD_MAIN ||
+         unit_type == ABTI_THREAD_TYPE_THREAD_MAIN_SCHED) &&
+        p_newthread->ctx.p_stack == NULL) {
+        /* We don't need to initialize the context of 1. the main thread, and
+         * 2. the main scheduler thread which runs on OS-level threads
+         * (p_stack == NULL). Invalidate the context here. */
+        abt_errno = ABTD_thread_context_invalidate(&p_newthread->ctx.ctx);
+    } else if (unit_type == ABTI_THREAD_TYPE_TASK) {
+        /* Tasklet does not need a context. */
+    } else if (p_sched == NULL) {
+#if ABT_CONFIG_THREAD_TYPE != ABT_THREAD_TYPE_DYNAMIC_PROMOTION
+        size_t stack_size = p_newthread->ctx.stacksize;
+        void *p_stack = p_newthread->ctx.p_stack;
+        abt_errno = ABTD_thread_context_create(NULL, stack_size, p_stack,
+                                               &p_newthread->ctx.ctx);
+#else
+        /* The context is not fully created now. */
+        abt_errno = ABTD_thread_context_init(NULL, &p_newthread->ctx.ctx);
+#endif
+    } else {
+        size_t stack_size = p_newthread->ctx.stacksize;
+        void *p_stack = p_newthread->ctx.p_stack;
+        abt_errno = ABTD_thread_context_create(NULL, stack_size, p_stack,
+                                               &p_newthread->ctx.ctx);
+    }
+    ABTI_CHECK_ERROR(abt_errno);
+    p_newthread->f_thread = thread_func;
+    p_newthread->p_arg = arg;
+
+    ABTD_atomic_release_store_int(&p_newthread->state, ABTI_THREAD_STATE_READY);
+    ABTD_atomic_release_store_uint32(&p_newthread->request, 0);
+    p_newthread->p_last_xstream = NULL;
+    p_newthread->p_parent = NULL;
+#ifndef ABT_CONFIG_DISABLE_STACKABLE_SCHED
+    p_newthread->p_sched = p_sched;
+#endif
+    p_newthread->p_pool = p_pool;
+    p_newthread->refcount = refcount;
+    p_newthread->type = unit_type;
+#ifndef ABT_CONFIG_DISABLE_MIGRATION
+    ABTD_atomic_relaxed_store_ptr(&p_newthread->p_migration_pool, NULL);
+#endif
+    ABTD_atomic_relaxed_store_ptr(&p_newthread->p_keytable, NULL);
+    p_newthread->id = ABTI_THREAD_INIT_ID;
+
+#ifdef ABT_CONFIG_USE_DEBUG_LOG
+    ABT_unit_id thread_id = ABTI_thread_get_id(p_newthread);
+    if (unit_type == ABTI_THREAD_TYPE_THREAD_MAIN) {
+        LOG_DEBUG("[U%" PRIu64 ":E%d] main ULT created\n", thread_id,
+                  p_parent_xstream ? p_parent_xstream->rank : 0);
+    } else if (unit_type == ABTI_THREAD_TYPE_THREAD_MAIN_SCHED) {
+        LOG_DEBUG("[U%" PRIu64 ":E%d] main sched ULT created\n", thread_id,
+                  p_parent_xstream ? p_parent_xstream->rank : 0);
+    } else {
+        LOG_DEBUG("[U%" PRIu64 "] created\n", thread_id);
+    }
+#endif
+
+    /* Invoke a thread creation event. */
+    if (unit_type == ABTI_THREAD_TYPE_TASK) {
+        ABTI_tool_event_task_create(p_local_xstream, p_newthread,
+                                    p_local_xstream ? p_local_xstream->p_thread
+                                                    : NULL,
+                                    p_pool);
+    } else {
+        ABTI_tool_event_thread_create(p_local_xstream, p_newthread,
+                                      p_local_xstream
+                                          ? p_local_xstream->p_thread
+                                          : NULL,
+                                      push_pool ? p_pool : NULL);
+    }
+
+    /* Create a wrapper unit */
+    if (push_pool) {
+        if (unit_type == ABTI_THREAD_TYPE_TASK) {
+            ABT_task h_newtask;
+            h_newtask = ABTI_task_get_handle(p_newthread);
+            p_newthread->unit = p_pool->u_create_from_task(h_newtask);
+        } else {
+            ABT_thread h_newthread;
+            h_newthread = ABTI_thread_get_handle(p_newthread);
+            p_newthread->unit = p_pool->u_create_from_thread(h_newthread);
+        }
+        /* Add this thread to the pool */
+#ifdef ABT_CONFIG_DISABLE_POOL_PRODUCER_CHECK
+        ABTI_pool_push(p_pool, p_newthread->unit);
+#else
+        abt_errno =
+            ABTI_pool_push(p_pool, p_newthread->unit,
+                           ABTI_self_get_native_thread_id(p_local_xstream));
+        if (abt_errno != ABT_SUCCESS) {
+            if (unit_type == ABTI_THREAD_TYPE_THREAD_MAIN) {
+                ABTI_task_free(p_local_xstream, p_newthread);
+            } else if (unit_type == ABTI_THREAD_TYPE_THREAD_MAIN) {
+                ABTI_thread_free_main(p_local_xstream, p_newthread);
+            } else if (unit_type == ABTI_THREAD_TYPE_THREAD_MAIN_SCHED) {
+                ABTI_thread_free_main_sched(p_local_xstream, p_newthread);
+            } else {
+                ABTI_thread_free(p_local_xstream, p_newthread);
+            }
+            goto fn_fail;
+        }
+#endif
+    } else {
+        p_newthread->unit = ABT_UNIT_NULL;
+    }
+
+    /* Return value */
+    *pp_newthread = p_newthread;
+
+fn_exit:
+    return abt_errno;
+
+fn_fail:
+    *pp_newthread = NULL;
+    HANDLE_ERROR_FUNC_WITH_CODE(abt_errno);
+    goto fn_exit;
+}
+
 static inline void ABTI_thread_set_request(ABTI_thread *p_thread, uint32_t req)
 {
     ABTD_atomic_fetch_or_uint32(&p_thread->request, req);

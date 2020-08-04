@@ -1424,8 +1424,8 @@ int ABTI_xstream_schedule_thread(ABTI_xstream **pp_local_xstream,
     if (ABTD_atomic_acquire_load_uint32(&p_thread->request) &
         ABTI_THREAD_REQ_CANCEL) {
         if (ABTI_thread_type_is_thread(p_thread->type)) {
-            LOG_DEBUG("[U%" PRIu64 ":E%d] canceled\n", ABTI_thread_get_id(p_thread),
-                      p_local_xstream->rank);
+            LOG_DEBUG("[U%" PRIu64 ":E%d] canceled\n",
+                      ABTI_thread_get_id(p_thread), p_local_xstream->rank);
             ABTD_thread_cancel(p_local_xstream, p_thread);
             ABTI_xstream_terminate_thread(p_local_xstream, p_thread);
             goto fn_exit;
@@ -1459,8 +1459,8 @@ int ABTI_xstream_schedule_thread(ABTI_xstream **pp_local_xstream,
     ABTI_thread *p_self = p_local_xstream->p_thread;
     uint32_t request;
     if (ABTI_thread_type_is_thread(p_thread->type)) {
-        p_thread =
-            ABTI_thread_context_switch_to_child(pp_local_xstream, p_self, p_thread);
+        p_thread = ABTI_thread_context_switch_to_child(pp_local_xstream, p_self,
+                                                       p_thread);
         /* The previous ULT (p_thread) may not be the same as one to which the
          * context has been switched. */
         /* The scheduler continues from here. */
@@ -1475,7 +1475,8 @@ int ABTI_xstream_schedule_thread(ABTI_xstream **pp_local_xstream,
         ABTI_tool_event_task_finish(p_local_xstream, p_thread, p_self);
         /* Set the current running scheduler's unit */
         p_local_xstream->p_thread = p_self;
-        ABTD_atomic_relaxed_store_uint32(&p_thread->request, ABTI_THREAD_REQ_TERMINATE);
+        ABTD_atomic_relaxed_store_uint32(&p_thread->request,
+                                         ABTI_THREAD_REQ_TERMINATE);
         request = ABTI_THREAD_REQ_TERMINATE;
     }
 

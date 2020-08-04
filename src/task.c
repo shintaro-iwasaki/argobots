@@ -5,10 +5,6 @@
 
 #include "abti.h"
 
-static int ABTI_task_create(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
-                            void (*task_func)(void *), void *arg,
-                            ABTI_sched *p_sched, int refcount,
-                            ABTI_thread **pp_newtask);
 static int ABTI_task_revive(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
                             void (*task_func)(void *), void *arg,
                             ABTI_thread *p_task);
@@ -51,8 +47,10 @@ int ABT_task_create(ABT_pool pool, void (*task_func)(void *), void *arg,
     ABTI_CHECK_NULL_POOL_PTR(p_pool);
 
     int refcount = (newtask != NULL) ? 1 : 0;
-    abt_errno = ABTI_task_create(p_local_xstream, p_pool, task_func, arg, NULL,
-                                 refcount, &p_newtask);
+    abt_errno =
+        ABTI_thread_create_internal(p_local_xstream, p_pool, task_func, arg,
+                                    NULL, ABTI_THREAD_TYPE_TASK, NULL, refcount,
+                                    p_local_xstream, ABT_TRUE, &p_newtask);
     ABTI_CHECK_ERROR(abt_errno);
 
     /* Return value */
@@ -114,8 +112,11 @@ int ABT_task_create_on_xstream(ABT_xstream xstream, void (*task_func)(void *),
     /* TODO: need to consider the access type of target pool */
     ABTI_pool *p_pool = ABTI_xstream_get_main_pool(p_xstream);
     int refcount = (newtask != NULL) ? 1 : 0;
-    abt_errno = ABTI_task_create(p_local_xstream, p_pool, task_func, arg, NULL,
-                                 refcount, &p_newtask);
+    abt_errno =
+        ABTI_thread_create_internal(p_local_xstream, p_pool, task_func, arg,
+                                    NULL, ABTI_THREAD_TYPE_TASK, NULL, refcount,
+                                    p_local_xstream, ABT_TRUE, &p_newtask);
+
     ABTI_CHECK_ERROR(abt_errno);
 
     /* Return value */
@@ -756,70 +757,6 @@ fn_fail:
 /*****************************************************************************/
 /* Private APIs                                                              */
 /*****************************************************************************/
-
-static int ABTI_task_create(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
-                            void (*task_func)(void *), void *arg,
-                            ABTI_sched *p_sched, int refcount,
-                            ABTI_thread **pp_newtask)
-{
-    int abt_errno = ABT_SUCCESS;
-    ABTI_thread *p_newtask;
-    ABT_task h_newtask;
-    ABTI_CHECK_NULL_POOL_PTR(p_pool);
-
-    /* Allocate a task object */
-    p_newtask = ABTI_mem_alloc_task(p_local_xstream);
-
-    p_newtask->p_last_xstream = NULL;
-    p_newtask->p_parent = NULL;
-    ABTD_atomic_relaxed_store_int(&p_newtask->state, ABTI_THREAD_STATE_READY);
-    ABTD_atomic_relaxed_store_uint32(&p_newtask->request, 0);
-    p_newtask->f_thread = task_func;
-    p_newtask->p_arg = arg;
-    p_newtask->p_pool = p_pool;
-    p_newtask->refcount = refcount;
-#ifndef ABT_CONFIG_DISABLE_STACKABLE_SCHED
-    p_newtask->p_sched = NULL;
-#endif
-    ABTD_atomic_relaxed_store_ptr(&p_newtask->p_keytable, NULL);
-#ifndef ABT_CONFIG_DISABLE_MIGRATION
-    p_newtask->migratable = ABT_TRUE;
-#endif
-    p_newtask->id = ABTI_TASK_INIT_ID;
-
-    /* Create a wrapper work unit */
-    h_newtask = ABTI_task_get_handle(p_newtask);
-    p_newtask->type = ABTI_THREAD_TYPE_TASK;
-    p_newtask->unit = p_pool->u_create_from_task(h_newtask);
-
-    ABTI_tool_event_task_create(p_local_xstream, p_newtask,
-                                p_local_xstream ? p_local_xstream->p_thread
-                                                : NULL,
-                                p_pool);
-    LOG_DEBUG("[T%" PRIu64 "] created\n", ABTI_task_get_id(p_newtask));
-
-    /* Add this task to the scheduler's pool */
-#ifdef ABT_CONFIG_DISABLE_POOL_PRODUCER_CHECK
-    ABTI_pool_push(p_pool, p_newtask->unit);
-#else
-    abt_errno = ABTI_pool_push(p_pool, p_newtask->unit,
-                               ABTI_self_get_native_thread_id(p_local_xstream));
-    if (abt_errno != ABT_SUCCESS) {
-        ABTI_task_free(p_local_xstream, p_newtask);
-        goto fn_fail;
-    }
-#endif
-
-    /* Return value */
-    *pp_newtask = p_newtask;
-
-fn_exit:
-    return abt_errno;
-
-fn_fail:
-    HANDLE_ERROR_FUNC_WITH_CODE(abt_errno);
-    goto fn_exit;
-}
 
 static int ABTI_task_revive(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
                             void (*task_func)(void *), void *arg,
