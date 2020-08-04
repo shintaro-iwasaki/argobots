@@ -158,7 +158,8 @@ int ABT_task_revive(ABT_pool pool, void (*task_func)(void *), void *arg,
     ABTI_pool *p_pool = ABTI_pool_get_ptr(pool);
     ABTI_CHECK_NULL_POOL_PTR(p_pool);
 
-    abt_errno = ABTI_thread_revive(p_local_xstream, p_pool, task_func, arg, p_task);
+    abt_errno =
+        ABTI_thread_revive(p_local_xstream, p_pool, task_func, arg, p_task);
     ABTI_CHECK_ERROR(abt_errno);
 
 fn_exit:
