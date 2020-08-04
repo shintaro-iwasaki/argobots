@@ -586,9 +586,6 @@ ABT_bool ABTI_thread_htable_switch_low(ABTI_xstream **pp_local_xstream,
                                        ABT_sync_event_type sync_event_type,
                                        void *p_sync);
 
-/* Tasklet */
-void ABTI_task_print(ABTI_thread *p_task, FILE *p_os, int indent);
-
 /* Key */
 void ABTI_ktable_free(ABTI_xstream *p_local_xstream, ABTI_ktable *p_ktable);
 

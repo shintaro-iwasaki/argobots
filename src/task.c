@@ -158,8 +158,7 @@ int ABT_task_revive(ABT_pool pool, void (*task_func)(void *), void *arg,
     ABTI_pool *p_pool = ABTI_pool_get_ptr(pool);
     ABTI_CHECK_NULL_POOL_PTR(p_pool);
 
-    abt_errno =
-        ABTI_thread_revive(p_local_xstream, p_pool, task_func, arg, p_task);
+    abt_errno = ABTI_thread_revive(p_local_xstream, p_pool, task_func, arg, p_task);
     ABTI_CHECK_ERROR(abt_errno);
 
 fn_exit:
@@ -747,63 +746,4 @@ fn_exit:
 fn_fail:
     HANDLE_ERROR_FUNC_WITH_CODE(abt_errno);
     goto fn_exit;
-}
-
-/*****************************************************************************/
-/* Private APIs                                                              */
-/*****************************************************************************/
-
-void ABTI_task_print(ABTI_thread *p_task, FILE *p_os, int indent)
-{
-    char *prefix = ABTU_get_indent_str(indent);
-
-    if (p_task == NULL) {
-        fprintf(p_os, "%s== NULL TASKLET ==\n", prefix);
-        goto fn_exit;
-    }
-
-    ABTI_xstream *p_xstream = p_task->p_last_xstream;
-    int xstream_rank = p_xstream ? p_xstream->rank : 0;
-    char *state;
-    switch (ABTD_atomic_acquire_load_int(&p_task->state)) {
-        case ABTI_THREAD_STATE_READY:
-            state = "READY";
-            break;
-        case ABTI_THREAD_STATE_RUNNING:
-            state = "RUNNING";
-            break;
-        case ABTI_THREAD_STATE_TERMINATED:
-            state = "TERMINATED";
-            break;
-        default:
-            state = "UNKNOWN";
-    }
-
-    fprintf(p_os,
-            "%s== TASKLET (%p) ==\n"
-            "%sid        : %" PRIu64 "\n"
-            "%sstate     : %s\n"
-            "%sES        : %p (%d)\n"
-            "%spool      : %p\n"
-#ifndef ABT_CONFIG_DISABLE_MIGRATION
-            "%smigratable: %s\n"
-#endif
-            "%srefcount  : %u\n"
-            "%srequest   : 0x%x\n"
-            "%sp_arg     : %p\n"
-            "%skeytable  : %p\n",
-            prefix, (void *)p_task, prefix, ABTI_thread_get_id(p_task), prefix,
-            state, prefix, (void *)p_task->p_last_xstream, xstream_rank, prefix,
-            (void *)p_task->p_pool,
-#ifndef ABT_CONFIG_DISABLE_MIGRATION
-            prefix, (p_task->migratable == ABT_TRUE) ? "TRUE" : "FALSE",
-#endif
-            prefix, p_task->refcount, prefix,
-            ABTD_atomic_acquire_load_uint32(&p_task->request), prefix,
-            p_task->p_arg, prefix,
-            ABTD_atomic_acquire_load_ptr(&p_task->p_keytable));
-
-fn_exit:
-    fflush(p_os);
-    ABTU_free(prefix);
 }

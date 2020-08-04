@@ -1946,6 +1946,9 @@ void ABTI_thread_print(ABTI_thread *p_thread, FILE *p_os, int indent)
         case ABTI_THREAD_TYPE_THREAD_USER:
             type = "USER";
             break;
+        case ABTI_THREAD_TYPE_TASK:
+            type = "TASK";
+            break;
         default:
             type = "UNKNOWN";
             break;
