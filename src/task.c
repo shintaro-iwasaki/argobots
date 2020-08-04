@@ -5,9 +5,6 @@
 
 #include "abti.h"
 
-static int ABTI_task_revive(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
-                            void (*task_func)(void *), void *arg,
-                            ABTI_thread *p_task);
 static inline uint64_t ABTI_task_get_new_id(void);
 
 /** @defgroup TASK Tasklet
@@ -164,7 +161,7 @@ int ABT_task_revive(ABT_pool pool, void (*task_func)(void *), void *arg,
     ABTI_CHECK_NULL_POOL_PTR(p_pool);
 
     abt_errno =
-        ABTI_task_revive(p_local_xstream, p_pool, task_func, arg, p_task);
+        ABTI_thread_revive(p_local_xstream, p_pool, task_func, arg, p_task);
     ABTI_CHECK_ERROR(abt_errno);
 
 fn_exit:
@@ -757,60 +754,6 @@ fn_fail:
 /*****************************************************************************/
 /* Private APIs                                                              */
 /*****************************************************************************/
-
-static int ABTI_task_revive(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
-                            void (*task_func)(void *), void *arg,
-                            ABTI_thread *p_task)
-{
-    int abt_errno = ABT_SUCCESS;
-
-    ABTI_CHECK_TRUE(ABTD_atomic_relaxed_load_int(&p_task->state) ==
-                        ABTI_THREAD_STATE_TERMINATED,
-                    ABT_ERR_INV_TASK);
-
-    p_task->p_last_xstream = NULL;
-    p_task->p_parent = NULL;
-    ABTD_atomic_relaxed_store_int(&p_task->state, ABTI_THREAD_STATE_READY);
-    ABTD_atomic_relaxed_store_uint32(&p_task->request, 0);
-    p_task->f_thread = task_func;
-    p_task->p_arg = arg;
-    p_task->refcount = 1;
-    ABTD_atomic_relaxed_store_ptr(&p_task->p_keytable, NULL);
-
-    if (p_task->p_pool != p_pool) {
-        /* Free the unit for the old pool */
-        p_task->p_pool->u_free(&p_task->unit);
-
-        /* Set the new pool */
-        p_task->p_pool = p_pool;
-
-        /* Create a wrapper work unit */
-        ABT_task task = ABTI_task_get_handle(p_task);
-        p_task->unit = p_pool->u_create_from_task(task);
-    }
-
-    ABTI_tool_event_task_revive(p_local_xstream, p_task,
-                                p_local_xstream ? p_local_xstream->p_thread
-                                                : NULL,
-                                p_pool);
-    LOG_DEBUG("[T%" PRIu64 "] revived\n", ABTI_task_get_id(p_task));
-
-    /* Add this task to the scheduler's pool */
-#ifdef ABT_CONFIG_DISABLE_POOL_PRODUCER_CHECK
-    ABTI_pool_push(p_pool, p_task->unit);
-#else
-    abt_errno = ABTI_pool_push(p_pool, p_task->unit,
-                               ABTI_self_get_native_thread_id(p_local_xstream));
-    ABTI_CHECK_ERROR(abt_errno);
-#endif
-
-fn_exit:
-    return abt_errno;
-
-fn_fail:
-    HANDLE_ERROR_FUNC_WITH_CODE(abt_errno);
-    goto fn_exit;
-}
 
 void ABTI_task_free(ABTI_xstream *p_local_xstream, ABTI_thread *p_task)
 {

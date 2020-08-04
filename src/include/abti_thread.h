@@ -487,6 +487,87 @@ fn_fail:
     goto fn_exit;
 }
 
+static inline int ABTI_thread_revive(ABTI_xstream *p_local_xstream,
+                                     ABTI_pool *p_pool,
+                                     void (*thread_func)(void *), void *arg,
+                                     ABTI_thread *p_thread)
+{
+    int abt_errno = ABT_SUCCESS;
+    size_t stacksize;
+
+    ABTI_CHECK_TRUE(ABTD_atomic_relaxed_load_int(&p_thread->state) ==
+                        ABTI_THREAD_STATE_TERMINATED,
+                    ABT_ERR_INV_THREAD);
+
+    /* Create a ULT context */
+    if (p_thread->type != ABTI_THREAD_TYPE_TASK) {
+        stacksize = p_thread->ctx.stacksize;
+        abt_errno =
+            ABTD_thread_context_create(NULL, stacksize, p_thread->ctx.p_stack,
+                                       &p_thread->ctx.ctx);
+        p_thread->type = ABTI_THREAD_TYPE_THREAD_USER;
+    }
+    ABTI_CHECK_ERROR(abt_errno);
+
+    p_thread->f_thread = thread_func;
+    p_thread->p_arg = arg;
+
+    ABTD_atomic_relaxed_store_int(&p_thread->state, ABTI_THREAD_STATE_READY);
+    ABTD_atomic_relaxed_store_uint32(&p_thread->request, 0);
+    p_thread->p_last_xstream = NULL;
+    p_thread->p_parent = NULL;
+    p_thread->refcount = 1;
+
+    if (p_thread->p_pool != p_pool) {
+        /* Free the unit for the old pool */
+        p_thread->p_pool->u_free(&p_thread->unit);
+
+        /* Set the new pool */
+        p_thread->p_pool = p_pool;
+
+        /* Create a wrapper unit */
+        if (p_thread->type == ABTI_THREAD_TYPE_TASK) {
+            ABT_task h_task = ABTI_task_get_handle(p_thread);
+            p_thread->unit = p_pool->u_create_from_task(h_task);
+        } else {
+            ABT_thread h_thread = ABTI_thread_get_handle(p_thread);
+            p_thread->unit = p_pool->u_create_from_thread(h_thread);
+        }
+    }
+
+    /* Invoke a thread revive event. */
+    if (p_thread->type == ABTI_THREAD_TYPE_TASK) {
+        ABTI_tool_event_thread_revive(p_local_xstream, p_thread,
+                                      p_local_xstream
+                                          ? p_local_xstream->p_thread
+                                          : NULL,
+                                      p_pool);
+    } else {
+        ABTI_tool_event_task_revive(p_local_xstream, p_thread,
+                                    p_local_xstream ? p_local_xstream->p_thread
+                                                    : NULL,
+                                    p_pool);
+    }
+
+    LOG_DEBUG("[U%" PRIu64 "] revived\n", ABTI_thread_get_id(p_thread));
+
+    /* Add this thread to the pool */
+#ifdef ABT_CONFIG_DISABLE_POOL_PRODUCER_CHECK
+    ABTI_pool_push(p_pool, p_thread->unit);
+#else
+    abt_errno = ABTI_pool_push(p_pool, p_thread->unit,
+                               ABTI_self_get_native_thread_id(p_local_xstream));
+    ABTI_CHECK_ERROR(abt_errno);
+#endif
+
+fn_exit:
+    return abt_errno;
+
+fn_fail:
+    HANDLE_ERROR_FUNC_WITH_CODE(abt_errno);
+    goto fn_exit;
+}
+
 static inline void ABTI_thread_set_request(ABTI_thread *p_thread, uint32_t req)
 {
     ABTD_atomic_fetch_or_uint32(&p_thread->request, req);
