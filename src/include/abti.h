@@ -588,8 +588,6 @@ ABT_bool ABTI_thread_htable_switch_low(ABTI_xstream **pp_local_xstream,
 
 /* Tasklet */
 void ABTI_task_print(ABTI_thread *p_task, FILE *p_os, int indent);
-void ABTI_task_reset_id(void);
-ABT_unit_id ABTI_task_get_id(ABTI_thread *p_task);
 
 /* Key */
 void ABTI_ktable_free(ABTI_xstream *p_local_xstream, ABTI_ktable *p_ktable);

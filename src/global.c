@@ -61,7 +61,6 @@ int ABT_init(int argc, char **argv)
 
     /* Initialize IDs */
     ABTI_thread_reset_id();
-    ABTI_task_reset_id();
     ABTI_sched_reset_id();
     ABTI_pool_reset_id();
 
