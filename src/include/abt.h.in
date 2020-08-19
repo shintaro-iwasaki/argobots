@@ -129,11 +129,9 @@ enum ABT_thread_state {
     ABT_THREAD_STATE_TERMINATED
 };
 
-enum ABT_task_state {
-    ABT_TASK_STATE_READY,
-    ABT_TASK_STATE_RUNNING,
-    ABT_TASK_STATE_TERMINATED
-};
+#define ABT_TASK_STATE_READY ABT_THREAD_STATE_READY
+#define ABT_TASK_STATE_RUNNING ABT_THREAD_STATE_RUNNING
+#define ABT_TASK_STATE_TERMINATED ABT_THREAD_STATE_TERMINATED
 
 enum ABT_sched_state {
     ABT_SCHED_STATE_READY,
@@ -348,11 +346,11 @@ typedef struct ABT_thread_attr_opaque *     ABT_thread_attr;
 /* ULT state */
 typedef enum ABT_thread_state               ABT_thread_state;
 /* Tasklet state */
-typedef enum ABT_task_state                 ABT_task_state;
+typedef enum ABT_thread_state               ABT_task_state;
 /* ULT id (alias to keep backward compatibility) */
 typedef ABT_unit_id                         ABT_thread_id;
 /* Tasklet */
-typedef struct ABT_task_opaque *            ABT_task;
+typedef struct ABT_thread_opaque *          ABT_task;
 /* WU-specific data key */
 typedef struct ABT_key_opaque *             ABT_key;
 /* Mutex */
@@ -397,7 +395,6 @@ typedef enum ABT_sync_event_type            ABT_sync_event_type;
 #define ABT_UNIT_NULL            ((ABT_unit)           NULL)
 #define ABT_THREAD_NULL          ((ABT_thread)         NULL)
 #define ABT_THREAD_ATTR_NULL     ((ABT_thread_attr)    NULL)
-#define ABT_TASK_NULL            ((ABT_task)           NULL)
 #define ABT_KEY_NULL             ((ABT_key)            NULL)
 #define ABT_MUTEX_NULL           ((ABT_mutex)          NULL)
 #define ABT_MUTEX_ATTR_NULL      ((ABT_mutex_attr)     NULL)
@@ -418,7 +415,6 @@ typedef enum ABT_sync_event_type            ABT_sync_event_type;
 #define ABT_UNIT_NULL            ((ABT_unit)           (0x07))
 #define ABT_THREAD_NULL          ((ABT_thread)         (0x08))
 #define ABT_THREAD_ATTR_NULL     ((ABT_thread_attr)    (0x09))
-#define ABT_TASK_NULL            ((ABT_task)           (0x0a))
 #define ABT_KEY_NULL             ((ABT_key)            (0x0b))
 #define ABT_MUTEX_NULL           ((ABT_mutex)          (0x0c))
 #define ABT_MUTEX_ATTR_NULL      ((ABT_mutex_attr)     (0x0d))
@@ -430,6 +426,7 @@ typedef enum ABT_sync_event_type            ABT_sync_event_type;
 #define ABT_TIMER_NULL           ((ABT_timer)          (0x13))
 #define ABT_TOOL_CONTEXT_NULL    ((ABT_tool_context)   (0x14))
 #endif
+#define ABT_TASK_NULL ABT_THREAD_NULL
 
 /* Scheduler config */
 typedef enum {
