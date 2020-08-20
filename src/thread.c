@@ -2105,7 +2105,7 @@ static int ABTI_thread_revive(ABTI_xstream *p_local_xstream, ABTI_pool *p_pool,
                                                   : NULL,
                                   p_pool);
 
-    LOG_DEBUG("[U%" PRIu64 "] revived\n", ABTI_thread_get_id(&p_thread));
+    LOG_DEBUG("[U%" PRIu64 "] revived\n", ABTI_thread_get_id(p_thread));
 
     /* Add this thread to the pool */
 #ifdef ABT_CONFIG_DISABLE_POOL_PRODUCER_CHECK
