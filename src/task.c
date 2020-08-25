@@ -486,7 +486,7 @@ static int ABTI_task_create(ABTI_local *p_local, ABTI_pool *p_pool,
     ABTI_CHECK_NULL_POOL_PTR(p_pool);
 
     /* Allocate a task object */
-    p_newtask = ABTI_mem_alloc_task(p_local);
+    p_newtask = ABTI_mem_alloc_nythread(p_local);
 
     p_newtask->p_last_xstream = NULL;
     p_newtask->p_parent = NULL;

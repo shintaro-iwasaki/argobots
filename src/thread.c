@@ -1929,12 +1929,7 @@ void ABTI_thread_free(ABTI_local *p_local, ABTI_thread *p_thread)
     }
 
     /* Free ABTI_thread (stack will also be freed) */
-    ABTI_ythread *p_ythread = ABTI_thread_get_ythread_or_null(p_thread);
-    if (p_ythread) {
-        ABTI_mem_free_ythread(p_local, p_ythread);
-    } else {
-        ABTI_mem_free_task(p_local, p_thread);
-    }
+    ABTI_mem_free_thread(p_local, p_thread);
 }
 
 void ABTI_ythread_free_main(ABTI_local *p_local, ABTI_ythread *p_ythread)
@@ -1958,7 +1953,7 @@ void ABTI_ythread_free_main(ABTI_local *p_local, ABTI_ythread *p_ythread)
         ABTI_ktable_free(p_local, p_ktable);
     }
 
-    ABTI_mem_free_ythread(p_local, p_ythread);
+    ABTI_mem_free_thread(p_local, &p_ythread->thread);
 }
 
 void ABTI_ythread_free_main_sched(ABTI_local *p_local, ABTI_ythread *p_ythread)
@@ -1984,7 +1979,7 @@ void ABTI_ythread_free_main_sched(ABTI_local *p_local, ABTI_ythread *p_ythread)
         ABTI_ktable_free(p_local, p_ktable);
     }
 
-    ABTI_mem_free_ythread(p_local, p_ythread);
+    ABTI_mem_free_thread(p_local, &p_ythread->thread);
 }
 
 static inline ABT_bool ABTI_ythread_is_ready(ABTI_ythread *p_ythread)
