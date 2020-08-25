@@ -77,10 +77,9 @@ enum ABTI_sched_used {
 #define ABTI_THREAD_TYPE_NAMED ((ABTI_thread_type)(0x1 << 4))
 #define ABTI_THREAD_TYPE_MIGRATABLE ((ABTI_thread_type)(0x1 << 5))
 
-#define ABTI_THREAD_TYPE_STACK_MEMPOOL ((ABTI_thread_type)(0x1 << 6))
-#define ABTI_THREAD_TYPE_STACK_MALLOC ((ABTI_thread_type)(0x1 << 7))
-#define ABTI_THREAD_TYPE_STACK_USER ((ABTI_thread_type)(0x1 << 8))
-#define ABTI_THREAD_TYPE_STACK_MAIN ((ABTI_thread_type)(0x1 << 9))
+#define ABTI_THREAD_TYPE_MEM_MALLOC_DESC ((ABTI_thread_type)(0x1 << 6))
+#define ABTI_THREAD_TYPE_MEM_MEMPOOL_DESC_STACK ((ABTI_thread_type)(0x1 << 7))
+#define ABTI_THREAD_TYPE_MEM_MALLOC_DESC_STACK ((ABTI_thread_type)(0x1 << 8))
 
 enum ABTI_thread_state {
     ABTI_THREAD_STATE_READY,
