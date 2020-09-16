@@ -1826,7 +1826,8 @@ static inline void thread_free(ABTI_local *p_local, ABTI_thread *p_thread,
     }
 
     /* Free the key-value table */
-    ABTI_ktable *p_ktable = ABTD_atomic_acquire_load_ptr(&p_thread->p_keytable);
+    ABTI_ktable *p_ktable =
+        (ABTI_ktable *)ABTD_atomic_acquire_load_ptr(&p_thread->p_keytable);
     /* No parallel access to TLS is allowed. */
     ABTI_ASSERT(p_ktable != ABTI_KTABLE_LOCKED);
     if (p_ktable) {

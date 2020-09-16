@@ -1327,7 +1327,8 @@ ABTU_ret_err static int xstream_migrate_thread(ABTI_local *p_local,
                 ABTI_THREAD_REQ_MIGRATE);
 
     /* Extracting argument in migration request. */
-    p_pool = ABTD_atomic_relaxed_load_ptr(&p_mig_data->p_migration_pool);
+    p_pool = (ABTI_pool *)ABTD_atomic_relaxed_load_ptr(
+        &p_mig_data->p_migration_pool);
     ABTI_thread_unset_request(p_thread, ABTI_THREAD_REQ_MIGRATE);
 
     /* Change the associated pool */
