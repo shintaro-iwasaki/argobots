@@ -14,13 +14,23 @@ typedef void *fcontext_t;
 #define ABT_API_PRIVATE
 #endif
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 fcontext_t make_fcontext(void *sp, size_t size,
                          void (*thread_func)(void *)) ABT_API_PRIVATE;
-void *jump_fcontext(fcontext_t *old, fcontext_t new, void *arg) ABT_API_PRIVATE;
-void *take_fcontext(fcontext_t *old, fcontext_t new, void *arg) ABT_API_PRIVATE;
+void *jump_fcontext(fcontext_t *p_old_fctx, fcontext_t new_fctx,
+                    void *arg) ABT_API_PRIVATE;
+void *take_fcontext(fcontext_t *p_old_fctx, fcontext_t new_fctx,
+                    void *arg) ABT_API_PRIVATE;
 #if ABT_CONFIG_THREAD_TYPE == ABT_THREAD_TYPE_DYNAMIC_PROMOTION
 void init_and_call_fcontext(void *p_arg, void (*f_thread)(void *),
                             void *p_stacktop, fcontext_t *old);
+#endif
+
+#if defined(__cplusplus)
+} /* extern "C" */
 #endif
 
 static inline void ABTD_ythread_context_make(ABTD_ythread_context *p_ctx,
