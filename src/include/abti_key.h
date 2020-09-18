@@ -226,7 +226,8 @@ ABTU_ret_err static inline int ABTI_ktable_set(ABTI_local *p_local,
                                                ABTI_key *p_key, void *value)
 {
     int abt_errno;
-    ABTI_ktable *p_ktable = ABTD_atomic_acquire_load_ptr(pp_ktable);
+    ABTI_ktable *p_ktable =
+        (ABTI_ktable *)ABTD_atomic_acquire_load_ptr(pp_ktable);
     if (ABTU_unlikely(!ABTI_ktable_is_valid(p_ktable))) {
         /* Spinlock pp_ktable */
         while (1) {
@@ -242,7 +243,8 @@ ABTU_ret_err static inline int ABTI_ktable_set(ABTI_local *p_local,
             } else {
                 /* Failed to take a lock. Check if the value to see if it should
                  * try to take a lock again. */
-                p_ktable = ABTD_atomic_acquire_load_ptr(pp_ktable);
+                p_ktable =
+                    (ABTI_ktable *)ABTD_atomic_acquire_load_ptr(pp_ktable);
                 if (p_ktable == NULL) {
                     /* Try once more. */
                     continue;
@@ -250,7 +252,8 @@ ABTU_ret_err static inline int ABTI_ktable_set(ABTI_local *p_local,
                 /* It has been locked by another. */
                 while (p_ktable == ABTI_KTABLE_LOCKED) {
                     ABTD_atomic_pause();
-                    p_ktable = ABTD_atomic_acquire_load_ptr(pp_ktable);
+                    p_ktable =
+                        (ABTI_ktable *)ABTD_atomic_acquire_load_ptr(pp_ktable);
                 }
                 /* p_ktable has been allocated by another. */
                 break;
@@ -282,7 +285,8 @@ ABTU_ret_err static inline int ABTI_ktable_set_unsafe(ABTI_local *p_local,
 
 static inline void *ABTI_ktable_get(ABTD_atomic_ptr *pp_ktable, ABTI_key *p_key)
 {
-    ABTI_ktable *p_ktable = ABTD_atomic_acquire_load_ptr(pp_ktable);
+    ABTI_ktable *p_ktable =
+        (ABTI_ktable *)ABTD_atomic_acquire_load_ptr(pp_ktable);
     if (ABTI_ktable_is_valid(p_ktable)) {
         uint32_t idx;
         ABTI_ktelem *p_elem;

@@ -977,7 +977,7 @@ void ABTI_xstream_print(ABTI_xstream *p_xstream, FILE *p_os, int indent,
     if (p_xstream == NULL) {
         fprintf(p_os, "%*s== NULL ES ==\n", indent, "");
     } else {
-        char *type, *state;
+        const char *type, *state;
         switch (p_xstream->type) {
             case ABTI_XSTREAM_TYPE_PRIMARY:
                 type = "PRIMARY";
@@ -1327,7 +1327,8 @@ ABTU_ret_err static int xstream_migrate_thread(ABTI_local *p_local,
                 ABTI_THREAD_REQ_MIGRATE);
 
     /* Extracting argument in migration request. */
-    p_pool = ABTD_atomic_relaxed_load_ptr(&p_mig_data->p_migration_pool);
+    p_pool = (ABTI_pool *)ABTD_atomic_relaxed_load_ptr(
+        &p_mig_data->p_migration_pool);
     ABTI_thread_unset_request(p_thread, ABTI_THREAD_REQ_MIGRATE);
 
     /* Change the associated pool */
