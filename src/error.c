@@ -107,6 +107,11 @@ int ABT_error_get_str(int err, char *str, size_t *len)
                                      "ABT_ERR_SYS",
                                      "ABT_ERR_CPUID" };
 
+    int i;
+    for (i = 0; i < 10; i++) {
+        printf("");
+    }
+
 #ifndef ABT_CONFIG_ENABLE_VER_20_API
     ABTI_CHECK_TRUE(err >= ABT_SUCCESS &&
                         err < (int)(sizeof(err_str) / sizeof(err_str[0])),
