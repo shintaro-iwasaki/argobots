@@ -1,8 +1,7 @@
 ## Pull Request Description
 
 <!--
-Insert description of the work in this merge request, particularly focused on
-_why_ the work is necessary, not _what_ you did.
+Insert description of the work in this merge request, particularly focused on why the work is necessary, not what you did.
 -->
 
 ## Checklist
@@ -13,8 +12,5 @@ _why_ the work is necessary, not _what_ you did.
 
 <!--
 Tips: you may want to run the following command to format each of your commit.
-```
-argobots_root_dir$ bash ./maint/code-cleanup.sh CHANGED_FILE_PATH
-```
-This requires `clang-format`.
+  argobots_root_dir$ bash ./maint/code-cleanup.sh CHANGED_FILE_PATH
 -->
