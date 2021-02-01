@@ -109,7 +109,7 @@ int ABT_error_get_str(int err, char *str, size_t *len)
 
     int i;
     for (i = 0; i < 10; i++) {
-        printf("");
+        err += 0;
     }
 
 #ifndef ABT_CONFIG_ENABLE_VER_20_API
