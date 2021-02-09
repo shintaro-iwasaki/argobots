@@ -385,9 +385,10 @@ extern "C" {
  *
  * \c ABT_ERR_SYS represents a general error that happens in libraries used by
  * Argobots.  For example, this error is returned when system calls such as
- * \c futex() and \c open() or functions provided by standard libraries such as
+ * \c futex() and \c open() or functions provided by external libraries such as
  * \c pthread_create() and \c unw_init_local() fail.  Note that \c ABT_ERR_MEM
- * is returned if the error is caused by memory allocation.
+ * is returned if a memory allocation function such as \c malloc() or \c mmap()
+ * fails.
  */
 #define ABT_ERR_SYS                54
 /**
