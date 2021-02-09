@@ -1930,7 +1930,7 @@ ALIASES += DOC_DESC_V1X_RETURN_INFO_IF_POSSIBLE="\DOC_V1X This routine returns \
 
 ALIASES += DOC_DESC_V1X_RETURN_UNINITIALIZED="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED if Argobots is not initialized.\n \DOC_V20 The results are undefined if Argobots is not initialized. @rationale From Argobots 2.0, all the Argobots routines that are not explicitly noted do not check if Argobots is initialized.  This omission can reduce the branches that are unnecessary in most cases. @endrationale"
 
-ALIASES += DOC_DESC_V1X_SCHED_GET_POOLS_IDX{4}="\DOC_V1X If the summation of \1 and \2 is larger than the number of pools associated with \3, this routine returns \c ABT_ERR_SCHED.\n \DOC_V20 This routine does not update elements of \4 if corresponding pool elements specified by \1 and \2 are out of range. @rationale The restriction is unnecessary and thus this behavior is deprecated. @endrationale"
+ALIASES += DOC_DESC_V1X_SCHED_GET_POOLS_IDX{4}="\DOC_V1X If the summation of \1 and \2 is larger than the number of pools associated with \3, this routine returns \c ABT_ERR_SCHED.\n \DOC_V20 This routine does not update elements of \4 if corresponding pool elements specified by \1 and \2 are out of range. @rationale The restriction of Argobots 1.1 is unnecessary.  This behavior will be removed. @endrationale"
 
 ALIASES += DOC_DESC_V1X_SET_MIGRATABLE{2}="\DOC_V1X If \1 is the primary ULT or the work unit associated with the main scheduler, this routine has no effect and returns \c ABT_SUCCESS.\n \DOC_V20 If \1 is the primary ULT or the work unit associated with the main scheduler, this routine returns \2. @rationale The original behavior is error-prone since this routine does nothing but returns \c ABT_SUCCESS. @endrationale"
 
@@ -2176,7 +2176,7 @@ ALIASES += DOC_NOTE_POOL_TOTAL_SIZE="To see the details of the total size of a p
 
 ALIASES += DOC_NOTE_REPLACEMENT{1}="This routine will be replaced by \1 in the future."
 
-ALIASES += DOC_NOTE_TIMING_REQUEST="The timing of the request fulfillment is undefined, so a program that relies on when the request is fulfilled is non-conforming."
+ALIASES += DOC_NOTE_TIMING_REQUEST="The timing of the request fulfillment is undefined, so a program that relies on the timing of the request fulfillment is non-conforming."
 
 #---------------------------------------------------------------------------
 # Undefined behavior

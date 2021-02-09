@@ -458,9 +458,9 @@ enum ABT_sched_state {
  * @ingroup SCHED
  * @brief   Predefined scheduler type.
  *
- * Relying on a specific scheduling order is not recommended since its
- * implementation can be changed.  Users can create their own scheduler by using
- * \c ABT_sched_create().
+ * Relying on a specific scheduling order is not recommended since the
+ * implementation of predefined schedulers can be changed.  Users can create
+ * their own scheduler by using \c ABT_sched_create().
  */
 enum ABT_sched_predef {
     /** Default scheduler.  \c ABT_SCHED_BASIC is used. */
@@ -824,7 +824,7 @@ typedef enum ABT_sched_predef               ABT_sched_predef;
  * \DOC_V20 This type is removed since no Argobots routine uses this.
  * @endchangev20
  */
-typedef enum ABT_sched_state                ABT_sched_state ABT_DEPRECATED;
+typedef enum ABT_sched_state                ABT_sched_state;
 /**
  * @ingroup SCHED
  * @brief   Scheduler's work unit type.

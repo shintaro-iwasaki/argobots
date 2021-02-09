@@ -80,8 +80,7 @@ ABT_sched_config_var ABT_sched_basic_freq = { .idx = -4,
  * @endcode
  *
  * If the array contains multiple tuples that have the same \c idx of
- * \c ABT_sched_config_var, the value associated with \c idx is set to a
- * corrupted value.
+ * \c ABT_sched_config_var, \c idx is mapped to a corrupted value.
  *
  * @contexts
  * \DOC_CONTEXT_INIT \DOC_CONTEXT_NOCTXSWITCH
