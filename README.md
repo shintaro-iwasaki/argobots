@@ -20,7 +20,7 @@ README.md should contain enough information to get you started with Argobots.
 
 The following instructions take you through a sequence of steps to get the
 default configuration of Argobots up and running.  For compilation, Argobots
-needs a C compiler (`gcc` is sufficient).
+needs a C compiler (gcc is sufficient).
 
 Also, you need to know what shell you are using since different shell has
 different command syntax.  Command `echo $SHELL` prints out the current shell
