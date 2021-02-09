@@ -1818,7 +1818,7 @@ ALIASES += undefined="\par Undefined behavior"
 
 ALIASES += DOC_CONTEXT_ANY="This routine can be called in any execution context. Argobots does not need to be initialized."
 
-ALIASES += DOC_CONTEXT_ANY_NOTASK="This routine can be called in a ULT context and an external thread context. Argobots does not need to be initialized."
+ALIASES += DOC_CONTEXT_ANY_NOTASK="This routine can be called in a ULT context or an external thread context. Argobots does not need to be initialized."
 
 ALIASES += DOC_CONTEXT_CTXSWITCH="This routine may switch the context of the calling ULT."
 
@@ -1828,9 +1828,9 @@ ALIASES += DOC_CONTEXT_FINALIZE="This routine must be called by the same caller 
 
 ALIASES += DOC_CONTEXT_INIT="This routine can be called in any execution context. Argobots must be initialized."
 
-ALIASES += DOC_CONTEXT_INIT_NOEXT="This routine can be called in a ULT context and a tasklet context. Argobots must be initialized."
+ALIASES += DOC_CONTEXT_INIT_NOEXT="This routine can be called in a ULT context or a tasklet context. Argobots must be initialized."
 
-ALIASES += DOC_CONTEXT_INIT_NOTASK="This routine can be called in a ULT context and an external thread context. Argobots must be initialized."
+ALIASES += DOC_CONTEXT_INIT_NOTASK="This routine can be called in a ULT context or an external thread context. Argobots must be initialized."
 
 ALIASES += DOC_CONTEXT_INIT_SCHED{1}="This routine can be called by a work unit that is associated with \1. Argobots must be initialized."
 
