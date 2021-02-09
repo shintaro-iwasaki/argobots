@@ -5,14 +5,14 @@ Argobots is a lightweight, low-level threading and tasking framework.
 README.md should contain enough information to get you started with Argobots.
 
 1. [Getting Started](#1-getting-started)
-* [2. Testing Argobots](#2.-testing-argobots)
-3. Reporting Problems
-4. Alternate Configure Options
-5. Compiler Flags
-6. Developer Builds
+2. [Testing Argobots](#2-testing-argobots)
+3. [Reporting Problems](#3-reporting-problems)
+4. [Alternate Configure Options](#4-alternate-configure-options)
+5. [Compiler Flags](#5-compiler-flags)
+6. [Developer Builds](#6-developer-builds)
 
-More information about Argobots can be found at https://www.argobots.org
-Complete Argobots API can be found at https://www.argobots.org/doxygen/latest/
+- More information about Argobots can be found at https://www.argobots.org
+- Complete Argobots API can be found at https://www.argobots.org/doxygen/latest/
 
 -------------------------------------------------------------------------------
 
@@ -26,13 +26,10 @@ Also, you need to know what shell you are using since different shell has
 different command syntax.  Command `echo $SHELL` prints out the current shell
 used by your terminal program.
 
-The following assumes a user who downloaded a released version of Argobots.  If
-you clone Argobots using GitHub, please skip (a) and before (b)
-
 ### (a) Preparation
 
-*If you downloaded a release version of Argobots*, unpack the tar file and go to
-the top level directory:
+(a.1) *If you downloaded a release tarball of Argobots*, unpack the tar file and
+go to the top level directory:
 
 ```sh
     tar xzf argobots.tar.gz
@@ -44,7 +41,8 @@ the top level directory:
     # cd argobots
 ```
 
-*If you cloned Argobots*, go to the top level directory and create `configure`:
+(a.2) *If you cloned Argobots from the GitHub page*, go to the top level
+directory and create `configure`:
 
 ```sh
     cd argobots
@@ -95,12 +93,14 @@ developers and other users.
 
 ```sh
     make install 2>&1 | tee mi.txt
+
     ## If you are using csh or tcsh:
     # make install |& tee mi.txt
 ```
 
 This step collects all required files in the `bin` subdirectory of the directory
 specified by the prefix argument to configure.
+
 
 ## 2. Testing Argobots
 
@@ -121,6 +121,7 @@ The distribution also includes some Argobots examples.  You can run them in the
 If you run into any problems on running the test suite or examples, please
 follow step 3 below for reporting them to the Argobots developers and other
 users.
+
 
 ## 3. Reporting Problems
 
@@ -160,6 +161,7 @@ github issues page (https://github.com/pmodels/argobots/issues).  Even if you
 believe you have found a bug, we recommend you sending an email to
 discuss@argobots.org first.
 
+
 ## 4. Alternate Configure Options
 
 Argobots has a number of other features.  If you are exploring Argobots as part
@@ -170,6 +172,7 @@ found using:
 ```sh
     ./configure --help
 ```
+
 
 ## 5. Compiler Flags
 
@@ -183,13 +186,7 @@ configure.  For example, to build Argobots with -O3, one can simply do:
     ./configure --enable-fast=O3
 ```
 
-Or to disable all compiler optimizations, one can do:
-
-```sh
-    ./configure --disable-fast
-```
-
-For more details of --enable-fast, see the output of "./configure --help".
+For more details of `--enable-fast`, see the output of `./configure --help`.
 
 For performance testing, we recommend the following flags:
 
@@ -198,9 +195,11 @@ For performance testing, we recommend the following flags:
 ```
 
 For debugging, we recommend the following flags:
+
 ```sh
     ./configure --enable-fast=O0 --enable-debug=most
 ```
+
 
 ## 6. Developer Builds
 
