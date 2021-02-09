@@ -1890,7 +1890,7 @@ ALIASES += DOC_DESC_V10_ERROR_CODE_CHANGE{3}="\DOC_V10 \1 is returned if \3.\n \
 
 ALIASES += DOC_DESC_V10_EVENTUAL_UPDATE_READY_BUFFER{1}="\DOC_V10 This routine updates the memory buffer of \1 and returns \c ABT_SUCCESS if \1 is ready.\n \DOC_V11 This routine returns \c ABT_ERR_EVENTUAL if \1 is ready. @rationale An update of the memory buffer when \1 is ready breaks the semantics of \c eventual.  Such an update should be prohibited. @endrationale"
 
-ALIASES += DOC_DESC_V10_FUTURE_COMPARTMENT_ORDER="\DOC_V10 The order of elements of \c arg passed to \c cb_func() is the same order as the \c ABT_future_set() calls are terminated.\n \DOC_V11 The order of elements of \c arg passed to \c cb_func() is undefined. @rationale This specification in Argobots 1.0 is unclear and unreasonable because the exact timing of termination of \c ABT_future_set() is not observable if \c ABT_future_set() is called concurrently. @endrationale"
+ALIASES += DOC_DESC_V10_FUTURE_COMPARTMENT_ORDER="\DOC_V10 The order of elements of \c arg passed to \c cb_func() is the same order as the \c ABT_future_set() calls are terminated.\n \DOC_V11 The order of elements of \c arg passed to \c cb_func() is undefined. @rationale This specification in Argobots 1.0 is not reasonable because the exact timing of termination of \c ABT_future_set() is not observable if \c ABT_future_set() is called concurrently. @endrationale"
 
 ALIASES += DOC_DESC_V10_NOEXT{1}="\DOC_V10 If an external thread calls this routine, \1 is returned.\n \DOC_V11 An external thread may call this routine. @rationale Argobots 1.0 narrows the type of the caller without any reason.  Argobots 1.1 fixes it. @endrationale"
 
