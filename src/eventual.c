@@ -15,8 +15,8 @@
  *
  * \c ABT_eventual_create() creates a new eventual and returns its handle
  * through \c neweventual.  \c neweventual is set to unready.  If \c nbytes is
- * greater than zero, \c neweventual has a memory buffer of \c nbytes bytes for
- * \c neweventual.  This memory buffer of \c neweventual can be set by
+ * greater than zero, this routine allocates a memory buffer of \c nbytes bytes
+ * for \c neweventual.  This memory buffer of \c neweventual can be set by
  * \c ABT_eventual_set() and read by \c ABT_eventual_wait() and
  * \c ABT_eventual_test().  If \c nbytes is zero, \c neweventual is used without
  * passing the data from a setter to waiters.
