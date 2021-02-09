@@ -4,8 +4,8 @@ Argobots is a lightweight, low-level threading and tasking framework.
 
 README.md should contain enough information to get you started with Argobots.
 
-* [1. Getting Started](#getting-started)
-* [2. Testing Argobots](#testing-argobots)
+1. [Getting Started](#1-getting-started)
+* [2. Testing Argobots](#2.-testing-argobots)
 3. Reporting Problems
 4. Alternate Configure Options
 5. Compiler Flags
