@@ -1870,8 +1870,6 @@ ALIASES += DOC_DESC_ATOMICITY_XSTREAM_REQUEST="Requests for execution streams ar
 
 ALIASES += DOC_DESC_ATOMICITY_XSTREAM_STATE="Management of states of execution streams is performed atomically."
 
-ALIASES += DOC_DESC_REPLACEMENT{1}="This routine will be replaced by \1 in the future."
-
 ALIASES += DOC_DESC_SCHED_AUTOMATIC{1}="If \1 is not configured to be automatically freed, it is the user's responsibility to free \1 after its use unless \c newsched is associated with the main scheduler of the primary execution stream.  If \1 is configured to be automatically freed, \1 is automatically freed when a work unit associated with \1 is freed.  If the user never associates \1 with a work unit (e.g., by \c ABT_pool_add_sched() or \c ABT_xstream_set_main_sched()), it is the user's responsibility to free \1."
 
 ALIASES += DOC_DESC_TIMER_RESOLUTION="The resolution of elapsed time depends on the clock resolution by the system."
@@ -1930,7 +1928,7 @@ ALIASES += DOC_DESC_V1X_PRINT_RUNTIME_INFO="\DOC_V1X This routine returns \c ABT
 
 ALIASES += DOC_DESC_V1X_RETURN_INFO_IF_POSSIBLE="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED if Argobots is not initialized.\n \DOC_V20 This routine sets \c val and returns \c ABT_SUCCESS even when Argobots is not initialized if the queried information can be retrieved without Argobots initialization. @rationale Retrieving static configurations before initializing Argobots is helpful to check if the Argobots library is configured to enable necessary features. @endrationale"
 
-ALIASES += DOC_DESC_V1X_RETURN_UNINITIALIZED="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED if Argobots is not initialized.\n \DOC_V20 The results are undefined if Argobots is not initialized. @rationale From Argobots 2.0, all the Argobots routines that are not explicitly noted do not check if Argobots is initialized.  This omission can reduce the branches that are mostly unnecessary. @endrationale"
+ALIASES += DOC_DESC_V1X_RETURN_UNINITIALIZED="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED if Argobots is not initialized.\n \DOC_V20 The results are undefined if Argobots is not initialized. @rationale From Argobots 2.0, all the Argobots routines that are not explicitly noted do not check if Argobots is initialized.  This omission can reduce the branches that are unnecessary in most cases. @endrationale"
 
 ALIASES += DOC_DESC_V1X_SCHED_GET_POOLS_IDX{4}="\DOC_V1X If the summation of \1 and \2 is larger than the number of pools associated with \3, this routine returns \c ABT_ERR_SCHED.\n \DOC_V20 This routine does not update elements of \4 if corresponding pool elements specified by \1 and \2 are out of range. @rationale The restriction is unnecessary and thus this behavior is deprecated. @endrationale"
 
@@ -2175,6 +2173,8 @@ ALIASES += DOC_NOTE_NO_PADDING{2}="This routine does not pad \1 until a total \2
 ALIASES += DOC_NOTE_POOL_SIZE="To see the details of the size of a pool, please check \c ABT_pool_get_size()."
 
 ALIASES += DOC_NOTE_POOL_TOTAL_SIZE="To see the details of the total size of a pool, please check \c ABT_pool_get_total_size()."
+
+ALIASES += DOC_NOTE_REPLACEMENT{1}="This routine will be replaced by \1 in the future."
 
 ALIASES += DOC_NOTE_TIMING_REQUEST="The timing of the request fulfillment is undefined, so a program that relies on when the request is fulfilled is non-conforming."
 
