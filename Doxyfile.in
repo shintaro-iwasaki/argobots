@@ -1900,7 +1900,7 @@ ALIASES += DOC_DESC_V10_INCOMPLETE_SCHED_SIZE_CHECK{2}="\DOC_V10 If pools associ
 
 ALIASES += DOC_DESC_V10_CRUDE_TERMINATION_CHECK{2}="\DOC_V10 \2 is returned if the runtime finds that \1 is terminated.\n \DOC_V11 The results are undefined if \1 is terminated. @rationale Proper implementation of this check is expensive since it requires atomic management of a work unit state and a request.  Argobots 1.1 eliminates this check. @endrationale"
 
-ALIASES += DOC_DESC_V10_REJECT_MUTEX_ATTR_NULL{1}="\DOC_V10 This routine returns \c ABT_ERR_INV_MUTEX_ATTR if \1 is \c ABT_MUTEX_ATTR_NULL.\n \DOC_V11 This routine uses the default mutex attributes if \1 is \c ABT_MUTEX_ATTR_NULL. @rationale Most of the Argobots routines use the default attributes if the given configuration or attributes are NULL.  This routine should also follow this basic rule. @endrationale"
+ALIASES += DOC_DESC_V10_REJECT_MUTEX_ATTR_NULL{1}="\DOC_V10 This routine returns \c ABT_ERR_INV_MUTEX_ATTR if \1 is \c ABT_MUTEX_ATTR_NULL.\n \DOC_V11 This routine uses the default mutex attributes if \1 is \c ABT_MUTEX_ATTR_NULL. @rationale Most of the Argobots routines use the default attributes if the given configuration or attribute is NULL.  This routine should follow this behavior. @endrationale"
 
 ALIASES += DOC_DESC_V1X_ERROR_CODE_CHANGE{3}="\DOC_V1X \1 is returned if \3.\n \DOC_V20 \2 is returned if \3. @rationale Argobots 2.0 changes the error code for consistent behavior with other Argobots routines. @endrationale"
 

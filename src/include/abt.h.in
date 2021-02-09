@@ -1107,8 +1107,7 @@ typedef struct {
  * }
  * @endcode
  *
- * \c ABT_mutex_memory associated with the mutex that is in use may not be
- * initialized.
+ * \c ABT_mutex_memory that is in use may not be initialized again.
  */
 #define ABT_MUTEX_INITIALIZER                                                  \
     { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } }
@@ -1135,8 +1134,7 @@ typedef struct {
  * }
  * @endcode
  *
- * \c ABT_mutex_memory associated with the mutex that is in use may not be
- * initialized.
+ * \c ABT_mutex_memory that is in use may not be initialized again.
  */
 #define ABT_RECURSIVE_MUTEX_INITIALIZER                                        \
     { { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } }
@@ -1198,8 +1196,7 @@ typedef struct {
  * }
  * @endcode
  *
- * \c ABT_cond_memory associated with a condition variable that is in use may
- * not be initialized.
+ * \c ABT_cond_memory that is in use may not be initialized again.
  */
 #define ABT_COND_INITIALIZER                                                   \
     { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } }
@@ -1260,9 +1257,9 @@ extern ABT_sched_config_var ABT_sched_config_var_end ABT_API_PUBLIC;
  * @var     ABT_sched_basic_freq
  * @brief   Predefined ABT_sched_config_var to configure the frequency for
  *          checking events of the basic scheduler.
+ * @hideinitializer
  *
  * Its type is int.  The user may not change its variables.
- * @hideinitializer
  */
 extern ABT_sched_config_var ABT_sched_basic_freq ABT_API_PUBLIC;
 /**
@@ -1280,12 +1277,12 @@ extern ABT_sched_config_var ABT_sched_config_access ABT_API_PUBLIC;
  * @var     ABT_sched_config_automatic
  * @brief   Predefined ABT_sched_config_var to configure whether the scheduler
  *          is freed automatically or not.
+ * @hideinitializer
  *
  * Its type is int.  If the value is non-zero, the scheduler is freed
  * automatically after its associated objects are released.  If the value is
  * zero, the scheduler is configured to be not freed automatically by the
  * Argobots runtime.  The user may not change its variables.
- * @hideinitializer
  */
 extern ABT_sched_config_var ABT_sched_config_automatic ABT_API_PUBLIC;
 
