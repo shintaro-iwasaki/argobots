@@ -1092,7 +1092,7 @@ typedef struct {
  * @ingroup MUTEX
  * @brief   Initialize \c ABT_mutex_memory.
  *
- * \c ABT_MUTEX_INITIALIZER() statically initializes \c ABT_mutex_memory.  The
+ * \c ABT_MUTEX_INITIALIZER statically initializes \c ABT_mutex_memory.  The
  * created mutex is not recursive.
 
  * The following shows how to use \c ABT_MUTEX_INITIALIZER.
@@ -1177,7 +1177,7 @@ typedef struct {
  * @ingroup COND
  * @brief   Initialize \c ABT_cond_memory.
  *
- * \c ABT_COND_INITIALIZER() statically initializes \c ABT_cond_memory.
+ * \c ABT_COND_INITIALIZER statically initializes \c ABT_cond_memory.
 
  * The following example shows how to use \c ABT_COND_INITIALIZER.
  * @code{.c}
