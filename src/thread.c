@@ -1512,7 +1512,7 @@ int ABT_thread_migrate(ABT_thread thread)
     ABTI_CHECK_TRUE(!(p_thread->type & ABTI_THREAD_TYPE_MAIN_SCHED),
                     ABT_ERR_INV_THREAD);
 
-    /* Copy the target executions streams. */
+    /* Copy the target execution streams. */
     int i, num_xstreams, abt_errno;
     ABTI_xstream **xstreams;
     ABTI_spinlock_acquire(&p_global->xstream_list_lock);

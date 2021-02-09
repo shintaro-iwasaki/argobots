@@ -110,17 +110,17 @@ extern "C" {
 #define ABT_ERR_OTHER               3
 /**
  * @ingroup ERROR_CODE
- * @brief   Error code: invalid executions stream.
+ * @brief   Error code: invalid execution stream.
  */
 #define ABT_ERR_INV_XSTREAM         4
 /**
  * @ingroup ERROR_CODE
- * @brief   Error code: invalid executions stream rank.
+ * @brief   Error code: invalid execution stream rank.
  */
 #define ABT_ERR_INV_XSTREAM_RANK    5
 /**
  * @ingroup ERROR_CODE
- * @brief   Error code: invalid executions stream barrier.
+ * @brief   Error code: invalid execution stream barrier.
  */
 #define ABT_ERR_INV_XSTREAM_BARRIER 6
 /**
@@ -661,7 +661,7 @@ enum ABT_sync_event_type {
     ABT_SYNC_EVENT_TYPE_USER,
     /** Other synchronization events. */
     ABT_SYNC_EVENT_TYPE_OTHER,
-    /** Joining an executions stream. */
+    /** Joining an execution stream. */
     ABT_SYNC_EVENT_TYPE_XSTREAM_JOIN,
     /** Joining a work unit. */
     ABT_SYNC_EVENT_TYPE_THREAD_JOIN,

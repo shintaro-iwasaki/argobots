@@ -525,7 +525,7 @@ int ABT_xstream_exit(void)
     ABTI_SETUP_GLOBAL(NULL);
 #endif
     ABTI_SETUP_LOCAL_YTHREAD(&p_local_xstream, &p_ythread);
-    /* Check if the target is the primary executions stream. */
+    /* Check if the target is the primary execution stream. */
     ABTI_CHECK_TRUE(p_local_xstream->type != ABTI_XSTREAM_TYPE_PRIMARY,
                     ABT_ERR_INV_XSTREAM);
 
