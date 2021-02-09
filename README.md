@@ -4,9 +4,6 @@ Argobots is a lightweight, low-level threading and tasking framework.
 
 README.md should contain enough information to get you started with Argobots.
 
-- More information about Argobots can be found at https://www.argobots.org
-- Argobots API: https://www.argobots.org/doxygen/latest/
-
 1. Getting Started
 2. Testing Argobots
 3. Reporting Problems
@@ -14,13 +11,16 @@ README.md should contain enough information to get you started with Argobots.
 5. Compiler Flags
 6. Developer Builds
 
+More information about Argobots can be found at https://www.argobots.org
+Complete Argobots API can be found at https://www.argobots.org/doxygen/latest/
+
 -------------------------------------------------------------------------------
 
 ## 1. Getting Started
 
 The following instructions take you through a sequence of steps to get the
 default configuration of Argobots up and running.  For compilation, Argobots
-needs a C compiler (`gcc 4.8.5` or newer).
+needs a C compiler (`gcc` is sufficient).
 
 Also, you need to know what shell you are using since different shell has
 different command syntax.  Command `echo $SHELL` prints out the current shell
@@ -51,14 +51,16 @@ the top level directory:
     ./autogen.sh
 ```
 
-### (b) Choose an installation directory (say `/home/USERNAME/argobots-install`)
+### (b) Choose an installation directory
 
 The installation directory should be non-existent or empty.
+The following assumes `/home/USERNAME/argobots-install`
 
 ### (c) Configure Argobots specifying the installation directory
 
 ```sh
     ./configure --prefix=/home/USERNAME/argobots-install 2>&1 | tee c.txt
+
     ## If you are using csh or tcsh:
     # ./configure --prefix=/home/USERNAME/argobots-install |& tee c.txt
 ```
@@ -70,6 +72,7 @@ are straight-forward to follow.
 
 ```sh
     make 2>&1 | tee m.txt
+
     ## If you are using csh or tcsh:
     # make |& tee m.txt
 ```
@@ -80,6 +83,7 @@ make again with `V=1`.
 
 ```sh
     make V=1 2>&1 | tee m.txt
+
     ## If you are using csh or tcsh:
     # make V=1 |& tee m.txt
 ```
@@ -141,9 +145,9 @@ BEFORE SENDING, AS THE FILES CAN BE LARGE.  Note that, depending on which step
 the build failed, some of the files might not exist.
 
 ```
-    argobots/c.txt (generated in step 1(c) above)
-    argobots/m.txt (generated in step 1(d) above)
-    argobots/mi.txt (generated in step 1(e) above)
+    argobots/c.txt      (generated in step 1(c) above)
+    argobots/m.txt      (generated in step 1(d) above)
+    argobots/mi.txt     (generated in step 1(e) above)
     argobots/config.log (generated in step 1(c) above)
 ```
 
@@ -193,7 +197,7 @@ For performance testing, we recommend the following flags:
     ./configure --enable-perf-opt --enable-affinity --disable-checks
 ```
 
-For debugging purpose, we recommend the following flags:
+For debugging, we recommend the following flags:
 ```sh
     ./configure --enable-fast=O0 --enable-debug=most
 ```
