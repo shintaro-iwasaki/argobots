@@ -87,7 +87,7 @@ extern "C" {
  * @ingroup ERROR_CODE
  * @brief   Error code: the routine returns successfully.
  *
- * \c ABT_SUCCESS is guaranteed to have the value of zero.
+ * \c ABT_SUCCESS is guaranteed to be 0.
  */
 #define ABT_SUCCESS                 0
 /**
