@@ -1426,9 +1426,9 @@ typedef struct {
      * @brief Access type.
      *
      * This value is used to determine a value returned by
-     * \c ABT_pool_get_access().  The Argobots assumes all pools can be accessed
-     * by any ULT, tasklet, or external thread.  It is the user's responsibility
-     * to manage the access to pools.
+     * \c ABT_pool_get_access().  Argobots assumes all pools can be accessed by
+     * any ULTs, tasklets, and external threads.  It is the user's
+     * responsibility to manage the access to pools.
      *
      * @changev11
      * \DOC_DESC_V10_POOL_NOACCESS
@@ -1528,8 +1528,9 @@ typedef struct {
      *
      * \c u_free() frees the work unit \c unit that is created by
      * \c u_create_from_thread().  Its associated entity (i.e., \c ABT_thread)
-     * is freed by the Argobots runtime.  \c unit is neither pointing to
-     * \c ABT_UNIT_NULL nor \c NULL.  The user may modify a value of \c unit.
+     * is freed by the Argobots runtime.  \c unit is pointing to neither
+     * \c ABT_UNIT_NULL nor \c NULL.  \c u_free() may modify the value pointed
+     * to be \c unit.
      *
      * \c u_free() is not optional, so the user must implement this function.
      *
@@ -1562,7 +1563,8 @@ typedef struct {
      * Specifically, the current Argobots treats a pool whose size is zero as an
      * empty pool.
      *
-     * \c u_free() is not optional, so the user must implement this function.
+     * \c p_get_size() is not optional, so the user must implement this
+     * function.
      *
      * The caller of \c p_get_size() is undefined, so a program that relies on
      * the caller of \c p_get_size() is non-conforming.
@@ -1573,8 +1575,8 @@ typedef struct {
      * @brief Function that pushes a work unit to a pool.
      *
      * \c p_push() pushes the work unit \c unit to the pool \c pool.  \c unit
-     * must be stored in \c pool and can be popped by its pop functions (e.g.,
-     * \c p_pop()) later.
+     * must be stored in \c pool and able to be popped by its pop functions
+     * (e.g., \c p_pop()) later.
      *
      * \c p_push() is not optional, so the user must implement this function.
      *
@@ -1634,8 +1636,8 @@ typedef struct {
      * on the caller of \c p_pop_timedwait() is non-conforming.
      *
      * @changev20
-     * \DOC_V20 \c p_pop_timedwait() is deprecated.  The user should use
-     * \c p_pop_wait() instead.
+     * \DOC_V20 \c p_pop_timedwait() is deprecated and replaced by
+     * \c p_pop_wait().
      * @endchangev20
      */
     ABT_pool_pop_timedwait_fn p_pop_timedwait;
@@ -1669,12 +1671,13 @@ typedef struct {
     /**
      * @fn    int (*p_print_all)(ABT_pool pool, void *arg,
      *                           void (*print_f)(void *arg, ABT_unit unit))
-     * @brief Function that applies a function to all work units in a pool.
+     * @brief Function that applies a user-given function to all work units in a
+     *        pool.
      *
      * \c p_print_all() applies \c print_f to all work units in the pool
      * \c pool.  \c print_f() is called with the user-given argument \c arg and
-     * the work unit.  The caller guarantees that \c print_f() does not modify
-     * the state of \c pool and work units in \c pool.
+     * the work unit handle.  The caller guarantees that \c print_f() does not
+     * modify the states of \c pool and work units in \c pool.
      *
      * \c p_print_all() is optional, so the user may set \c p_print_all to
      * \c NULL.
