@@ -1106,10 +1106,6 @@ typedef struct {
  * }
  * @endcode
  *
- * \c ABT_mutex obtained by \c ABT_MUTEX_MEMORY_GET_HANDLE() may not be freed by
- * \c ABT_mutex_free().  The lifetime of \c ABT_mutex obtained by
- * \c ABT_MUTEX_MEMORY_GET_HANDLE() is the same as that of \c ABT_mutex_memory.
- *
  * \c ABT_mutex_memory associated with the mutex that is in use may not be
  * initialized.
  */
@@ -1200,10 +1196,6 @@ typedef struct {
  *     ABT_mutex_unlock(mutex);
  * }
  * @endcode
- *
- * \c ABT_cond obtained by \c ABT_COND_MEMORY_GET_HANDLE() may not be freed by
- * \c ABT_cond_free().  The lifetime of \c ABT_cond obtained by
- * \c ABT_COND_MEMORY_GET_HANDLE() is the same as that of \c ABT_cond_memory.
  *
  * \c ABT_cond_memory associated with a condition variable that is in use may
  * not be initialized.
