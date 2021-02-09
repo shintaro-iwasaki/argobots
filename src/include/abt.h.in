@@ -33,7 +33,7 @@ extern "C" {
  *
  * \code{.unparsed}
  * ABT_VERSION = [MAJ].[MIN].[REV][EXT][EXT_NUMBER]
- * Example: 1.0.7rc1 has
+ * Example: ABT_VERSION = 1.0.7rc1 represents
  *          MAJ = 1
  *          MIN = 0
  *          REV = 7
@@ -62,8 +62,8 @@ extern "C" {
  * \endcode
  *
  * \c ABT_NUMVERSION has 1 digit for MAJ, 2 digits for MIN, 2 digits for REV, 1
- * digit for EXT, and 2 digits for EXT_NUMBER, so 1.0.7rc1 is converted to the
- * numeric version 10007201.
+ * digit for EXT, and 2 digits for EXT_NUMBER.  For example, 1.0.7rc1 is
+ * converted to the numeric version 10007201.
  */
 #define ABT_NUMVERSION @ABT_NUMVERSION@
 
@@ -571,7 +571,7 @@ enum ABT_info_query_kind {
     ABT_INFO_QUERY_KIND_ENABLED_PRINT_ERRNO,
     /** Whether Argobots prints a debug message or not */
     ABT_INFO_QUERY_KIND_ENABLED_LOG,
-    /** Whether Argobots is configured to be Valgrind friendly */
+    /** Whether Argobots is configured to be Valgrind friendly or not */
     ABT_INFO_QUERY_KIND_ENABLED_VALGRIND,
     /** Whether an error is checked or not */
     ABT_INFO_QUERY_KIND_ENABLED_CHECK_ERROR,
@@ -592,9 +592,10 @@ enum ABT_info_query_kind {
     ABT_INFO_QUERY_KIND_ENABLED_STACKABLE_SCHED,
     /** Whether the external thread feature is supported or not */
     ABT_INFO_QUERY_KIND_ENABLED_EXTERNAL_THREAD,
-    /** Whether a predefined scheduler sleeps or not */
+    /** Whether a predefined scheduler sleeps when idle or not */
     ABT_INFO_QUERY_KIND_ENABLED_SCHED_SLEEP,
-    /** Whether the Argobots configuration is printed on ABT_init() or not */
+    /** Whether the Argobots configuration is printed in the top-level
+     *  ABT_init() or not */
     ABT_INFO_QUERY_KIND_ENABLED_PRINT_CONFIG,
     /** Whether the affinity setting is supported or not */
     ABT_INFO_QUERY_KIND_ENABLED_AFFINITY,

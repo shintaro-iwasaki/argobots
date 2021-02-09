@@ -1876,9 +1876,9 @@ ALIASES += DOC_DESC_SCHED_AUTOMATIC{1}="If \1 is not configured to be automatica
 
 ALIASES += DOC_DESC_TIMER_RESOLUTION="The resolution of elapsed time depends on the clock resolution by the system."
 
-ALIASES += DOC_DESC_V10_ACCEPT_TASK{1}="\DOC_V10 The user cannot pass a tasklet handle as \1.\n \DOC_V11 This routine accepts a tasklet handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 has introduced this change since this change does not break the compatibility of API and ABI of Argobots 1.0. @endrationale"
+ALIASES += DOC_DESC_V10_ACCEPT_TASK{1}="\DOC_V10 The user cannot pass a tasklet handle as \1.\n \DOC_V11 This routine accepts a tasklet handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 introduces this change since this change does not break the compatibility of API and ABI with Argobots 1.0. @endrationale"
 
-ALIASES += DOC_DESC_V10_ACCEPT_THREAD{1}="\DOC_V10 The user cannot pass a ULT handle as \1.\n \DOC_V11 This routine accepts a ULT handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 has introduced this change since this change does not break the compatibility of API and ABI of Argobots 1.0. @endrationale"
+ALIASES += DOC_DESC_V10_ACCEPT_THREAD{1}="\DOC_V10 The user cannot pass a ULT handle as \1.\n \DOC_V11 This routine accepts a ULT handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 introduces this change since this change does not break the compatibility of API and ABI with Argobots 1.0. @endrationale"
 
 ALIASES += DOC_DESC_V10_ACCESS_VIOLATION="\DOC_V10 If a pool access violation happens regarding an access type of a pool, an error is returned.\n \DOC_V11 If a pool access violation happens regarding an access type of a pool, the results are undefined. @rationale The implementation of Argobots 1.0 does not strictly check this error, so some user programs work without any problem if it is no simultaneously accessed, although it is a user error.  Such an error is often not recoverable, for example, when an execution stream pushes a ULT to a pool that cannot be accessed by this execution stream.  Correctly implementing the access violation check could break the actual API compatibility.  From Argobots 1.1, it is the user's responsibility to manage access to pools. @endrationale"
 
@@ -1906,7 +1906,7 @@ ALIASES += DOC_DESC_V10_REJECT_MUTEX_ATTR_NULL{1}="\DOC_V10 This routine returns
 
 ALIASES += DOC_DESC_V1X_ERROR_CODE_CHANGE{3}="\DOC_V1X \1 is returned if \3.\n \DOC_V20 \2 is returned if \3. @rationale Argobots 2.0 changes the error code for consistent behavior with other Argobots routines. @endrationale"
 
-ALIASES += DOC_DESC_V1X_NOEXT{1}="\DOC_V1X If an external thread calls this routine, \1 is returned.\n \DOC_V20 An external thread may call this routine. @rationale Argobots 2.0 allows an external thread as much as possible unless it is semantically wrong. @endrationale"
+ALIASES += DOC_DESC_V1X_NOEXT{1}="\DOC_V1X If an external thread calls this routine, \1 is returned.\n \DOC_V20 An external thread may call this routine. @rationale Argobots 2.0 allows an external thread where possible unless it is semantically wrong. @endrationale"
 
 ALIASES += DOC_DESC_V1X_NOTASK{1}="\DOC_V1X If a tasklet calls this routine, \1 is returned.\n \DOC_V20 A tasklet may call this routine. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general. @endrationale"
 
@@ -1922,13 +1922,13 @@ ALIASES += DOC_DESC_V1X_CRUDE_SCHED_USED_CHECK{2}="\DOC_V1X \2 is returned if th
 
 ALIASES += DOC_DESC_V1X_CRUDE_WAITER_CHECK{2}="\DOC_V1X \2 is returned if this routine finds a waiter on \1.\n \DOC_V20 The results are undefined if a waiter is blocked on \1. @rationale The current implementation of this check is crude considering the asynchronous nature of \1.  From Argobots 2.0, it becomes the user's responsibility to ensure that no waiter is blocked on \1. @endrationale"
 
-ALIASES += DOC_DESC_V1X_PRINT_HANDLE_INFO{3}="\DOC_V1X This routine returns \3 when \1 is \2.\n \DOC_V20 This routine prints that \1 is an invalid handle when \1 is \2. @rationale The information routines primarily for debugging and diagnosis should avoid returning an error as much as possible. @endrationale"
+ALIASES += DOC_DESC_V1X_PRINT_HANDLE_INFO{3}="\DOC_V1X This routine returns \3 when \1 is \2.\n \DOC_V20 This routine prints that \1 is an invalid handle when \1 is \2. @rationale The information routines are primarily for debugging and diagnosis, so they should avoid returning an error. @endrationale"
 
-ALIASES += DOC_DESC_V1X_PRINT_HANDLE_INFO{4}="\DOC_V1X This routine returns \4 when \1 is \2 or \3.\n \DOC_V20 This routine prints that \1 is an invalid handle when \1 is \2 or \3. @rationale The information routines primarily for debugging and diagnosis should avoid returning an error as much as possible. @endrationale"
+ALIASES += DOC_DESC_V1X_PRINT_HANDLE_INFO{4}="\DOC_V1X This routine returns \4 when \1 is \2 or \3.\n \DOC_V20 This routine prints that \1 is an invalid handle when \1 is \2 or \3. @rationale The information routines are primarily for debugging and diagnosis, so they should avoid returning an error. @endrationale"
 
-ALIASES += DOC_DESC_V1X_PRINT_RUNTIME_INFO="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED when Argobots is not initialized.\n \DOC_V20 This routine prints the queried information and returns \c ABT_SUCCESS when Argobots is not initialized. @rationale The information routines primarily for debugging and diagnosis should avoid returning an error as much as possible. @endrationale"
+ALIASES += DOC_DESC_V1X_PRINT_RUNTIME_INFO="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED when Argobots is not initialized.\n \DOC_V20 This routine prints the information and returns \c ABT_SUCCESS when Argobots is not initialized. @rationale The information routines are primarily for debugging and diagnosis, so they should avoid returning an error. @endrationale"
 
-ALIASES += DOC_DESC_V1X_RETURN_INFO_IF_POSSIBLE="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED if Argobots is not initialized.\n \DOC_V20 This routine returns \c ABT_ERR_UNINITIALIZED if Argobots is not initialized and the queried information cannot be retrieved when Argobots is not initialized. @rationale Retrieving static configurations before initializing Argobots is helpful to check if the loaded Argobots implements necessary features. @endrationale"
+ALIASES += DOC_DESC_V1X_RETURN_INFO_IF_POSSIBLE="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED if Argobots is not initialized.\n \DOC_V20 This routine sets \c val and returns \c ABT_SUCCESS even when Argobots is not initialized if the queried information can be retrieved without Argobots initialization. @rationale Retrieving static configurations before initializing Argobots is helpful to check if the Argobots library is configured to enable necessary features. @endrationale"
 
 ALIASES += DOC_DESC_V1X_RETURN_UNINITIALIZED="\DOC_V1X This routine returns \c ABT_ERR_UNINITIALIZED if Argobots is not initialized.\n \DOC_V20 The results are undefined if Argobots is not initialized. @rationale From Argobots 2.0, all the Argobots routines that are not explicitly noted do not check if Argobots is initialized.  This omission can reduce the branches that are mostly unnecessary. @endrationale"
 
@@ -2168,7 +2168,7 @@ ALIASES += DOC_NOTE_DEFAULT_THREAD_ATTRIBUTE="To see the details of the default 
 
 ALIASES += DOC_NOTE_EFFECT_ABT_FINALIZE="\c ABT_finalize() frees the primary execution stream, its main scheduler, and pools associated with the main scheduler."
 
-ALIASES += DOC_NOTE_INFO_PRINT="The information written by this routine is meant for debugging and diagnosis and can be changed because of an update of the internal implementation of Argobots.  A program that relies on the output of this routine is non-conforming."
+ALIASES += DOC_NOTE_INFO_PRINT="The information written by this routine is meant for debugging and diagnosis, so the contents and the format can be changed because of an update of the internal implementation of Argobots.  A program that relies on the output of this routine is non-conforming."
 
 ALIASES += DOC_NOTE_NO_PADDING{2}="This routine does not pad \1 until a total \2 elements have been written to \1.  The remaining elements of \1 that are not written by this routine are unmodified."
 
