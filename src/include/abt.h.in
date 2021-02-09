@@ -99,8 +99,7 @@ extern "C" {
  * @ingroup ERROR_CODE
  * @brief   Error code: Memory allocation failure.
  *
- * \c ABT_ERR_MEM is returned if memory allocation functions such as \c malloc()
- * or \c mmap() fail.
+ * \c ABT_ERR_MEM is returned if memory allocation fails.
  */
 #define ABT_ERR_MEM                 2
 /**
