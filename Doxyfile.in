@@ -1872,7 +1872,7 @@ ALIASES += DOC_DESC_ATOMICITY_XSTREAM_STATE="Management of states of execution s
 
 ALIASES += DOC_DESC_SCHED_AUTOMATIC{1}="If \1 is not configured to be automatically freed, it is the user's responsibility to free \1 after its use unless \c newsched is associated with the main scheduler of the primary execution stream.  If \1 is configured to be automatically freed, \1 is automatically freed when a work unit associated with \1 is freed.  If the user never associates \1 with a work unit (e.g., by \c ABT_pool_add_sched() or \c ABT_xstream_set_main_sched()), it is the user's responsibility to free \1."
 
-ALIASES += DOC_DESC_TIMER_RESOLUTION="The resolution of elapsed time depends on the clock resolution by the system."
+ALIASES += DOC_DESC_TIMER_RESOLUTION="The resolution of elapsed time depends on the clock resolution of the system."
 
 ALIASES += DOC_DESC_V10_ACCEPT_TASK{1}="\DOC_V10 The user cannot pass a tasklet handle as \1.\n \DOC_V11 This routine accepts a tasklet handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 introduces this change since this change does not break the compatibility of API and ABI with Argobots 1.0. @endrationale"
 
