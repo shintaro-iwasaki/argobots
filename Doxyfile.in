@@ -1842,7 +1842,7 @@ ALIASES += DOC_CONTEXT_NOCTXSWITCH="This routine does not switch the context of 
 
 ALIASES += DOC_CONTEXT_NOTE_SIGNAL_SAFE="This routine is signal-safe.  Note that it is the user's responsibility to call this function properly by, for example, loading the Argobots library and/or resolving the symbol of this routine in a signal handler."
 
-ALIASES += DOC_CONTEXT_TOOL_CALLBACK{1}="This routine can be called only in a tool callback function \1."
+ALIASES += DOC_CONTEXT_TOOL_CALLBACK="This routine can be called only in a tool callback function."
 
 #---------------------------------------------------------------------------
 # Description
@@ -1874,9 +1874,9 @@ ALIASES += DOC_DESC_SCHED_AUTOMATIC{1}="If \1 is not configured to be automatica
 
 ALIASES += DOC_DESC_TIMER_RESOLUTION="The resolution of elapsed time depends on the clock resolution of the system."
 
-ALIASES += DOC_DESC_V10_ACCEPT_TASK{1}="\DOC_V10 The user cannot pass a tasklet handle as \1.\n \DOC_V11 This routine accepts a tasklet handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 introduces this change since this change does not break the compatibility of API and ABI with Argobots 1.0. @endrationale"
+ALIASES += DOC_DESC_V10_ACCEPT_TASK{1}="\DOC_V10 The user cannot pass a tasklet handle as \1.\n \DOC_V11 This routine accepts a tasklet handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 introduces this change since it does not break the compatibility of API and ABI with Argobots 1.0. @endrationale"
 
-ALIASES += DOC_DESC_V10_ACCEPT_THREAD{1}="\DOC_V10 The user cannot pass a ULT handle as \1.\n \DOC_V11 This routine accepts a ULT handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 introduces this change since this change does not break the compatibility of API and ABI with Argobots 1.0. @endrationale"
+ALIASES += DOC_DESC_V10_ACCEPT_THREAD{1}="\DOC_V10 The user cannot pass a ULT handle as \1.\n \DOC_V11 This routine accepts a ULT handle as \1. @rationale Argobots 2.0 integrates a ULT and a tasklet into a single thread concept to make the API more general.  Argobots 1.1 introduces this change since it does not break the compatibility of API and ABI with Argobots 1.0. @endrationale"
 
 ALIASES += DOC_DESC_V10_ACCESS_VIOLATION="\DOC_V10 If a pool access violation happens regarding an access type of a pool, an error is returned.\n \DOC_V11 If a pool access violation happens regarding an access type of a pool, the results of this routine are undefined. @rationale The implementation of Argobots 1.0 does not strictly check this error, so some user programs work without an error if it is no simultaneously accessed although such a program is, strictly speaking, non-conforming.  Such an access violation error is often not recoverable, for example, when an execution stream pushes a ULT to a pool that cannot be accessed by this execution stream.  Existing programs do not work if access violation is strictly checked.  From Argobots 1.1, it is the user's responsibility to manage the access to pools. @endrationale"
 
@@ -2230,7 +2230,7 @@ ALIASES += DOC_UNDEFINED_UNINIT="If Argobots is not initialized, the results are
 
 ALIASES += DOC_UNDEFINED_WAITER{1}="If there is a waiter blocked on \1, the results are undefined.\n"
 
-ALIASES += DOC_UNDEFINED_WORK_UNIT_BLOCKED{1}="If \1 is blocked on by \2, the results are undefined.\n"
+ALIASES += DOC_UNDEFINED_WORK_UNIT_BLOCKED{2}="If \1 is blocked on by \2, the results are undefined.\n"
 
 ALIASES += DOC_UNDEFINED_WORK_UNIT_IN_POOL{1}="If \1 is in a pool, the results are undefined.\n"
 

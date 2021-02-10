@@ -11,19 +11,19 @@ ABTU_ret_err static int task_create(ABTI_local *p_local, ABTI_pool *p_pool,
                                     ABTI_thread **pp_newtask);
 
 /** @defgroup TASK Tasklet
- * This group is for Tasklet.
+ * This group is for Tasklet.  A tasklet is a work unit that cannot yield.
  */
 
 /**
  * @ingroup TASK
- * @brief   Create a new task.
+ * @brief   Create a new tasklet.
  *
  * \c ABT_task_create() creates a new tasklet, associates it with the pool
  * \c pool, and returns its handle through \c newtask.  This routine pushes the
  * created tasklet to the pool \c pool.  The created tasklet calls
  * \c task_func() with \c arg when it is scheduled.
  *
- * If \c newtask is \c NULL, this routine creates an unnamed tasklet.  The
+ * If \c newtask is \c NULL, this routine creates an unnamed tasklet.  An
  * unnamed tasklet is automatically released on the completion of
  * \c task_func().  Otherwise, \c newtask must be explicitly freed by
  * \c ABT_thread_free().
@@ -85,7 +85,7 @@ int ABT_task_create(ABT_pool pool, void (*task_func)(void *), void *arg,
  * tasklet to the pool \c pool.  The created tasklet calls \c task_func() with
  * \c arg when it is scheduled.
  *
- * If \c newtask is \c NULL, this routine creates an unnamed tasklet.  The
+ * If \c newtask is \c NULL, this routine creates an unnamed tasklet.  An
  * unnamed tasklet is automatically released on the completion of
  * \c task_func().  Otherwise, \c newtask must be explicitly freed by
  * \c ABT_thread_free().
@@ -214,7 +214,7 @@ int ABT_task_cancel(ABT_task task)
  * \c task.
  *
  * @note
- * \DOC_DESC_REPLACEMENT{\c ABT_self_get_thread()}
+ * \DOC_NOTE_REPLACEMENT{\c ABT_self_get_thread()}
  *
  * @changev20
  * \DOC_DESC_V1X_NOYIELDABLE{\c ABT_ERR_INV_TASK}
@@ -265,7 +265,7 @@ int ABT_task_self(ABT_task *task)
  * \c ABT_task_self_id() returns the ID of the calling work unit through \c id.
  *
  * @note
- * \DOC_DESC_REPLACEMENT{\c ABT_self_get_thread_id()}
+ * \DOC_NOTE_REPLACEMENT{\c ABT_self_get_thread_id()}
  *
  * @changev20
  * \DOC_DESC_V1X_NOYIELDABLE{\c ABT_ERR_INV_TASK}
@@ -324,32 +324,27 @@ int ABT_task_get_xstream(ABT_task task, ABT_xstream *xstream)
 
 /**
  * @ingroup TASK
- * @brief   Get a state of a work unit.
+ * @brief   Get a state of a tasklet.
  *
- * \c ABT_task_get_state() returns the state of the work unit \c task through
+ * \c ABT_task_get_state() returns the state of the tasklet \c task through
  * \c state.
  *
  * \DOC_DESC_ATOMICITY_WORK_UNIT_STATE
- *
- * @changev20
- * \DOC_DESC_V1X_TASK_STATE_ACCEPT_THREAD{\c task, \c ABT_ERR_INV_TASK}
- * @endchangev20
  *
  * @contexts
  * \DOC_CONTEXT_INIT \DOC_CONTEXT_NOCTXSWITCH
  *
  * @errors
  * \DOC_ERROR_SUCCESS
- * \DOC_ERROR_INV_THREAD_HANDLE{\c thread}
  * \DOC_ERROR_INV_TASK_HANDLE{\c thread}
- * \DOC_V1X \DOC_ERROR_INV_TASK_Y{\c thread}
+ * \DOC_ERROR_INV_TASK_Y{\c thread}
  *
  * @undefined
  * \DOC_UNDEFINED_UNINIT
  * \DOC_UNDEFINED_NULL_PTR{\c state}
  *
- * @param[in]  task   work unit handle
- * @param[out] state  state of \c work unit
+ * @param[in]  task   tasklet handle
+ * @param[out] state  state of \c task
  * @return Error code
  */
 int ABT_task_get_state(ABT_task task, ABT_task_state *state)
@@ -443,7 +438,7 @@ int ABT_task_is_unnamed(ABT_task task, ABT_bool *flag);
 
 /**
  * @ingroup TASK
- * @brief   Compare two tasklet handles for equality.
+ * @brief   Compare two work-unit handles for equality.
  *
  * The functionality of this routine is the same as \c ABT_thread_equal().
  */

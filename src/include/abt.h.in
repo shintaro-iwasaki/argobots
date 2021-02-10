@@ -628,13 +628,13 @@ enum ABT_info_query_kind {
 enum ABT_tool_query_kind {
     /** Query a pool to which a work unit is or will be pushed. */
     ABT_TOOL_QUERY_KIND_POOL,
-    /** Query a current depth of stackable work units. */
+    /** Query a current depth of stacked work units. */
     ABT_TOOL_QUERY_KIND_STACK_DEPTH,
-    /** Query a type of caller that incurs an event. */
+    /** Query a type of the caller that incurs an event. */
     ABT_TOOL_QUERY_KIND_CALLER_TYPE,
     /** Query a handle to the caller that incurs an event. */
     ABT_TOOL_QUERY_KIND_CALLER_HANDLE,
-    /** Query a type of synchronization object that incurs an event. */
+    /** Query a type of the synchronization object that incurs an event. */
     ABT_TOOL_QUERY_KIND_SYNC_OBJECT_TYPE,
     /** Query a handle of the synchronization object that incurs an event. */
     ABT_TOOL_QUERY_KIND_SYNC_OBJECT_HANDLE,
@@ -737,7 +737,7 @@ enum ABT_sync_event_type {
 #define ABT_TOOL_EVENT_THREAD_RESUME  (1 << 9)
 /**
  * @ingroup TOOL
- * @brief   Work-unit-event mask: all events above.
+ * @brief   Work-unit-event mask: all events.
  */
 #define ABT_TOOL_EVENT_THREAD_ALL     ((uint64_t)((1 << 12) - 1))
 
