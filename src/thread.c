@@ -1206,8 +1206,8 @@ int ABT_thread_resume(ABT_thread thread)
  * \c ABT_thread_migrate_to_xstream() requests a migration of the work unit
  * \c thread to any pool associated with the main scheduler of execution stream
  * \c xstream.  The previous migration request is overwritten by the new
- * migration request.  The requested work unit may be migrated before its work
- * unit function completes.
+ * migration request.  The requested work unit may be migrated before its
+ * work-unit function completes.
  *
  * @note
  * \DOC_NOTE_TIMING_REQUEST
@@ -1296,7 +1296,7 @@ int ABT_thread_migrate_to_xstream(ABT_thread thread, ABT_xstream xstream)
  * \c ABT_thread_migrate_to_sched() requests a migration of the work unit
  * \c thread to any pool associated with the scheduler \c sched.  The previous
  * migration request is overwritten by the new migration request.  The requested
- * work unit may be migrated before its work unit function completes.
+ * work unit may be migrated before its work-unit function completes.
  *
  * @note
  * \DOC_NOTE_TIMING_REQUEST
@@ -1381,7 +1381,7 @@ int ABT_thread_migrate_to_sched(ABT_thread thread, ABT_sched sched)
  * \c ABT_thread_migrate_to_pool() requests a migration of the work unit
  * \c thread to the pool \c pool.  The previous migration request will be
  * overwritten by the new migration request.  The requested work unit may be
- * migrated before its work unit function completes.
+ * migrated before its work-unit function completes.
  *
  * @note
  * \DOC_NOTE_TIMING_REQUEST
@@ -1453,7 +1453,7 @@ int ABT_thread_migrate_to_pool(ABT_thread thread, ABT_pool pool)
  * one of the execution streams.  The last execution stream of \c thread is not
  * chosen as the target execution stream.  The previous migration request will
  * be overwritten by the new migration request.  The requested work unit may be
- * migrated before its work unit function completes.
+ * migrated before its work-unit function completes.
  *
  * @note
  * \DOC_NOTE_TIMING_REQUEST
@@ -1944,9 +1944,9 @@ int ABT_thread_get_id(ABT_thread thread, ABT_unit_id *thread_id)
 
 /**
  * @ingroup ULT
- * @brief   Set an argument for a work unit function of a work unit.
+ * @brief   Set an argument for a work-unit function of a work unit.
  *
- * \c ABT_thread_set_arg() sets the argument \c arg for the work unit function
+ * \c ABT_thread_set_arg() sets the argument \c arg for the work-unit function
  * of the work unit \c thread.
  *
  * @changev11
@@ -1965,7 +1965,7 @@ int ABT_thread_get_id(ABT_thread thread, ABT_unit_id *thread_id)
  * \DOC_UNDEFINED_THREAD_UNSAFE{\c thread}
  *
  * @param[in] thread  work unit handle
- * @param[in] arg     argument for the work unit function
+ * @param[in] arg     argument for the work-unit function
  * @return Error code
  */
 int ABT_thread_set_arg(ABT_thread thread, void *arg)
@@ -1979,9 +1979,9 @@ int ABT_thread_set_arg(ABT_thread thread, void *arg)
 
 /**
  * @ingroup ULT
- * @brief   Retrieve an argument for a work unit function of a work unit.
+ * @brief   Retrieve an argument for a work-unit function of a work unit.
  *
- * \c ABT_thread_get_arg() returns the argument for the work unit function of
+ * \c ABT_thread_get_arg() returns the argument for the work-unit function of
  * the work unit \c thread through \c arg.
  *
  * @changev11
@@ -2000,7 +2000,7 @@ int ABT_thread_set_arg(ABT_thread thread, void *arg)
  * \DOC_UNDEFINED_NULL_PTR{\c arg}
  *
  * @param[in]  thread  work unit handle
- * @param[out] arg     argument for the work unit function
+ * @param[out] arg     argument for the work-unit function
  * @return Error code
  */
 int ABT_thread_get_arg(ABT_thread thread, void **arg)

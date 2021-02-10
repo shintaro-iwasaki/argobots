@@ -32,9 +32,9 @@ static ABTD_atomic_uint32 g_ABTI_initialized =
  * \c ABT_init() initializes the Argobots execution environment.  If Argobots
  * has not been initialized, the first caller of \c ABT_init() becomes the
  * primary ULT that is running on the primary execution stream.  If Argobots has
- * been already initialized, \c ABT_init() increments a reference counter
- * atomically.  This routine returns \c ABT_SUCCESS even if Argobots has been
- * already initialized.
+ * already been initialized, \c ABT_init() increments a reference counter
+ * atomically.  This routine returns \c ABT_SUCCESS even if Argobots has already
+ * been initialized.
  *
  * \DOC_DESC_ATOMICITY_ARGOBOTS_INIT
  *

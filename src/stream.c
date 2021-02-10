@@ -606,7 +606,6 @@ int ABT_xstream_cancel(ABT_xstream xstream)
  * \DOC_V1X \DOC_ERROR_UNINITIALIZED
  *
  * @undefined
- * \DOC_UNDEFINED_UNINIT
  * \DOC_UNDEFINED_NULL_PTR{\c xstream}
  * \DOC_V20 \DOC_UNDEFINED_UNINIT
  *
@@ -650,7 +649,6 @@ int ABT_xstream_self(ABT_xstream *xstream)
  * \DOC_V1X \DOC_ERROR_UNINITIALIZED
  *
  * @undefined
- * \DOC_UNDEFINED_UNINIT
  * \DOC_UNDEFINED_NULL_PTR{\c rank}
  * \DOC_V20 \DOC_UNDEFINED_UNINIT
  *

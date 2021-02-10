@@ -469,7 +469,7 @@ int ABT_task_get_id(ABT_task task, ABT_unit_id *task_id)
 
 /**
  * @ingroup TASK
- * @brief   Retrieve an argument for a work unit function of a work unit.
+ * @brief   Retrieve an argument for a work-unit function of a work unit.
  *
  * The functionality of this routine is the same as \c ABT_thread_get_arg()
  * except for the error code.  \c ABT_task_get_arg() returns

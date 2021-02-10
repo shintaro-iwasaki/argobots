@@ -123,8 +123,8 @@ int ABT_key_free(ABT_key *key)
  * @brief   Associate a value with a work-unit-specific data key in the calling
  *          work unit.
  *
- * \c ABT_key_set() associates a value \c value of the work-unit-specific data
- * key \c key in the calling work unit. Different work units may bind different
+ * \c ABT_key_set() associates a value \c value with the work-unit-specific data
+ * key \c key in the calling work unit.  Different work units may bind different
  * values to the same key.
  *
  * \DOC_DESC_ATOMICITY_WORK_UNIT_KEY
@@ -179,7 +179,7 @@ int ABT_key_set(ABT_key key, void *value)
  *
  * \c ABT_key_get() returns the value in the caller associated with the
  * work-unit-specific data key \c key in the calling work unit through \c value.
- * If the caller has never set a value for the key, this routine sets \c value
+ * If the caller has never set a value for \c key, this routine sets \c value
  * to \c NULL.
  *
  * \DOC_DESC_ATOMICITY_WORK_UNIT_KEY
