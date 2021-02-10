@@ -792,7 +792,7 @@ typedef struct ABT_xstream_opaque *         ABT_xstream;
 typedef enum ABT_xstream_state              ABT_xstream_state;
 /**
  * @ingroup ES_BARRIER
- * @brief   Execution stream barrier handle type.
+ * @brief   Execution-stream barrier handle type.
  *
  * A NULL handle of this type is \c ABT_XSTREAM_BARRIER_NULL.
  */
