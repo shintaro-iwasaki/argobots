@@ -545,7 +545,7 @@ int ABT_self_suspend(void)
  * @errors
  * \DOC_ERROR_INV_XSTREAM_EXT
  * \DOC_ERROR_INV_THREAD_NY
- * \DOC_ERROR_INV_THREAD_PRIMARY_ULT{\c the caller}
+ * \DOC_ERROR_INV_THREAD_PRIMARY_ULT{the caller}
  *
  * @undefined
  * \DOC_UNDEFINED_UNINIT

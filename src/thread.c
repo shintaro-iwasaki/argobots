@@ -603,7 +603,7 @@ int ABT_thread_join_many(int num_threads, ABT_thread *thread_list)
  * @errors
  * \DOC_ERROR_INV_XSTREAM_EXT
  * \DOC_ERROR_INV_THREAD_NY
- * \DOC_ERROR_INV_THREAD_PRIMARY_ULT{\c the caller}
+ * \DOC_ERROR_INV_THREAD_PRIMARY_ULT{the caller}
  * \DOC_V1X \DOC_ERROR_UNINITIALIZED
  *
  * @undefined
@@ -648,7 +648,7 @@ int ABT_thread_exit(void)
  * @errors
  * \DOC_ERROR_SUCCESS
  * \DOC_ERROR_INV_THREAD_HANDLE{\c thread}
- * \DOC_ERROR_INV_THREAD_PRIMARY_ULT{\c the caller}
+ * \DOC_ERROR_INV_THREAD_PRIMARY_ULT{the caller}
  * \DOC_ERROR_FEATURE_NA{the cancellation feature}
  *
  * @undefined
