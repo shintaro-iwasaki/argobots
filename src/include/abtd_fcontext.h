@@ -38,6 +38,20 @@ fcontext_t *init_and_switch_fcontext(fcontext_t *p_new_ctx,
 void init_and_jump_fcontext(fcontext_t *p_new_ctx,
                             void (*f_thread)(fcontext_t *),
                             void *p_stacktop) ABT_API_PRIVATE;
+fcontext_t *switch_with_call_fcontext(void *cb_arg, void (*f_cb)(void *),
+                                      fcontext_t *p_new_ctx,
+                                      fcontext_t *p_old_ctx) ABT_API_PRIVATE;
+void jump_with_call_fcontext(void *cb_arg, void (*f_cb)(void *),
+                             fcontext_t *p_new_ctx,
+                             fcontext_t *p_old_ctx) ABT_API_PRIVATE;
+fcontext_t *init_and_switch_with_call_fcontext(
+    void *cb_arg, void (*f_cb)(void *), fcontext_t *p_new_ctx,
+    void (*f_thread)(fcontext_t *), void *p_stacktop,
+    fcontext_t *p_old_ctx) ABT_API_PRIVATE;
+void init_and_jump_with_call_fcontext(void *cb_arg, void (*f_cb)(void *),
+                                      fcontext_t *p_new_ctx,
+                                      void (*f_thread)(fcontext_t *),
+                                      void *p_stacktop) ABT_API_PRIVATE;
 void peek_fcontext(void *arg, void (*f_peek)(void *),
                    fcontext_t *p_target_ctx) ABT_API_PRIVATE;
 
@@ -93,6 +107,8 @@ ABTD_ythread_context_get_stacksize(ABTD_ythread_context *p_ctx)
     return p_ctx->stacksize;
 }
 
+#ifdef NON_TESTING
+
 static inline ABTD_ythread_context *
 ABTD_ythread_context_switch(ABTD_ythread_context *p_old,
                             ABTD_ythread_context *p_new)
@@ -121,6 +137,85 @@ ABTD_ythread_context_jump(ABTD_ythread_context *p_old,
         /* First time. */
         init_and_jump_fcontext(&p_new->ctx, ABTD_ythread_context_func_wrapper,
                                p_new->p_stacktop);
+    }
+    ABTU_unreachable();
+}
+
+#else
+
+static void do_nothing(void *arg)
+{
+    ABTI_ASSERT(arg == NULL);
+}
+
+static inline ABTD_ythread_context *
+ABTD_ythread_context_switch(ABTD_ythread_context *p_old,
+                            ABTD_ythread_context *p_new)
+{
+    fcontext_t *p_fctx;
+    if (ABTDI_fcontext_is_created(&p_new->ctx)) {
+        /* The context is already initialized. */
+        p_fctx = switch_with_call_fcontext(NULL, do_nothing, &p_new->ctx,
+                                           &p_old->ctx);
+    } else {
+        /* First time. */
+        p_fctx = init_and_switch_with_call_fcontext(
+            NULL, do_nothing, &p_new->ctx, ABTD_ythread_context_func_wrapper,
+            p_new->p_stacktop, &p_old->ctx);
+    }
+    return ABTDI_ythread_context_get_context(p_fctx);
+}
+
+ABTU_noreturn static inline void
+ABTD_ythread_context_jump(ABTD_ythread_context *p_old,
+                          ABTD_ythread_context *p_new)
+{
+    if (ABTDI_fcontext_is_created(&p_new->ctx)) {
+        /* The context is already initialized. */
+        jump_with_call_fcontext(NULL, do_nothing, &p_new->ctx, &p_old->ctx);
+    } else {
+        /* First time. */
+        init_and_jump_with_call_fcontext(NULL, do_nothing, &p_new->ctx,
+                                         ABTD_ythread_context_func_wrapper,
+                                         p_new->p_stacktop);
+    }
+    ABTU_unreachable();
+}
+
+#endif
+
+static inline ABTD_ythread_context *
+ABTD_ythread_context_switch_with_call(ABTD_ythread_context *p_old,
+                                      ABTD_ythread_context *p_new,
+                                      void (*f_cb)(void *), void *cb_arg)
+{
+    fcontext_t *p_fctx;
+    if (ABTDI_fcontext_is_created(&p_new->ctx)) {
+        /* The context is already initialized. */
+        p_fctx =
+            switch_with_call_fcontext(cb_arg, f_cb, &p_new->ctx, &p_old->ctx);
+    } else {
+        /* First time. */
+        p_fctx = init_and_switch_with_call_fcontext(
+            cb_arg, f_cb, &p_new->ctx, ABTD_ythread_context_func_wrapper,
+            p_new->p_stacktop, &p_old->ctx);
+    }
+    return ABTDI_ythread_context_get_context(p_fctx);
+}
+
+ABTU_noreturn static inline void
+ABTD_ythread_context_jump_with_call(ABTD_ythread_context *p_old,
+                                    ABTD_ythread_context *p_new,
+                                    void (*f_cb)(void *), void *cb_arg)
+{
+    if (ABTDI_fcontext_is_created(&p_new->ctx)) {
+        /* The context is already initialized. */
+        jump_with_call_fcontext(cb_arg, f_cb, &p_new->ctx, &p_old->ctx);
+    } else {
+        /* First time. */
+        init_and_jump_with_call_fcontext(cb_arg, f_cb, &p_new->ctx,
+                                         ABTD_ythread_context_func_wrapper,
+                                         p_new->p_stacktop);
     }
     ABTU_unreachable();
 }
