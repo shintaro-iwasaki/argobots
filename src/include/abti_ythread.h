@@ -44,44 +44,43 @@ ABTI_ythread_context_get_ythread(ABTD_ythread_context *p_ctx)
     return (ABTI_ythread *)(((char *)p_ctx) - offsetof(ABTI_ythread, ctx));
 }
 
-ABTU_noreturn static inline void ABTI_ythread_context_jump(ABTI_ythread *p_old,
-                                                           ABTI_ythread *p_new)
+ABTU_noreturn static inline void ABTI_ythread_context_jump(ABTI_ythread *p_new)
 {
-    ABTD_ythread_context_jump(&p_old->ctx, &p_new->ctx);
+    ABTD_ythread_context_jump(&p_new->ctx);
     ABTU_unreachable();
 }
 
 static inline void ABTI_ythread_context_switch(ABTI_ythread *p_old,
-                                                        ABTI_ythread *p_new)
+                                               ABTI_ythread *p_new)
 {
     ABTD_ythread_context_switch(&p_old->ctx, &p_new->ctx);
     /* Return the previous thread. */
 }
 
 ABTU_noreturn static inline void
-ABTI_ythread_context_jump_with_call(ABTI_ythread *p_old, ABTI_ythread *p_new,
-                                    void (*f_cb)(void *), void *cb_arg)
+ABTI_ythread_context_jump_with_call(ABTI_ythread *p_new, void (*f_cb)(void *),
+                                    void *cb_arg)
 {
-    ABTD_ythread_context_jump_with_call(&p_old->ctx, &p_new->ctx, f_cb, cb_arg);
+    ABTD_ythread_context_jump_with_call(&p_new->ctx, f_cb, cb_arg);
     ABTU_unreachable();
 }
 
-static inline void
-ABTI_ythread_context_switch_with_call(ABTI_ythread *p_old, ABTI_ythread *p_new,
-                                      void (*f_cb)(void *), void *cb_arg)
+static inline void ABTI_ythread_context_switch_with_call(ABTI_ythread *p_old,
+                                                         ABTI_ythread *p_new,
+                                                         void (*f_cb)(void *),
+                                                         void *cb_arg)
 {
     ABTD_ythread_context_switch_with_call(&p_old->ctx, &p_new->ctx, f_cb,
-                                              cb_arg);
+                                          cb_arg);
     /* Return the previous thread. */
 }
 
 ABTU_noreturn static inline void
-ABTI_ythread_jump_to_primary(ABTI_xstream *p_local_xstream, ABTI_ythread *p_old,
-                             ABTI_ythread *p_new)
+ABTI_ythread_jump_to_primary(ABTI_xstream *p_local_xstream, ABTI_ythread *p_new)
 {
     p_local_xstream->p_thread = &p_new->thread;
     p_new->thread.p_last_xstream = p_local_xstream;
-    ABTI_ythread_context_jump(p_old, p_new);
+    ABTI_ythread_context_jump(p_new);
     ABTU_unreachable();
 }
 
@@ -98,7 +97,7 @@ static inline void ABTI_ythread_switch_to_sibling_nocb_internal(
                               p_new->thread.p_parent);
         p_local_xstream->p_thread = &p_new->thread;
         p_new->thread.p_last_xstream = p_local_xstream;
-        ABTI_ythread_context_jump(p_old, p_new);
+        ABTI_ythread_context_jump(p_new);
         ABTU_unreachable();
     } else {
         ABTI_xstream *p_local_xstream = *pp_local_xstream;
@@ -124,7 +123,7 @@ static inline void ABTI_ythread_switch_to_parent_nocb_internal(
                                  p_old->thread.p_parent);
         p_local_xstream->p_thread = &p_new->thread;
         ABTI_ASSERT(p_new->thread.p_last_xstream == p_local_xstream);
-        ABTI_ythread_context_jump(p_old, p_new);
+        ABTI_ythread_context_jump(p_new);
         ABTU_unreachable();
     } else {
         ABTI_xstream *p_local_xstream = *pp_local_xstream;
@@ -168,7 +167,7 @@ static inline void ABTI_ythread_switch_to_sibling_cb_internal(
                               p_new->thread.p_parent);
         p_local_xstream->p_thread = &p_new->thread;
         p_new->thread.p_last_xstream = p_local_xstream;
-        ABTI_ythread_context_jump_with_call(p_old, p_new, f_cb, cb_arg);
+        ABTI_ythread_context_jump_with_call(p_new, f_cb, cb_arg);
         ABTU_unreachable();
     } else {
         ABTI_xstream *p_local_xstream = *pp_local_xstream;
@@ -195,7 +194,7 @@ static inline void ABTI_ythread_switch_to_parent_cb_internal(
                                  p_old->thread.p_parent);
         p_local_xstream->p_thread = &p_new->thread;
         ABTI_ASSERT(p_new->thread.p_last_xstream == p_local_xstream);
-        ABTI_ythread_context_jump_with_call(p_old, p_new, f_cb, cb_arg);
+        ABTI_ythread_context_jump_with_call(p_new, f_cb, cb_arg);
         ABTU_unreachable();
     } else {
         ABTI_xstream *p_local_xstream = *pp_local_xstream;
@@ -208,22 +207,6 @@ static inline void ABTI_ythread_switch_to_parent_cb_internal(
     }
 }
 
-static inline void ABTI_ythread_switch_to_child_cb_internal(
-    ABTI_xstream **pp_local_xstream, ABTI_ythread *p_old, ABTI_ythread *p_new,
-    void (*f_cb)(void *), void *cb_arg)
-{
-    p_new->thread.p_parent = &p_old->thread;
-    ABTI_xstream *p_local_xstream = *pp_local_xstream;
-    ABTI_event_thread_run(p_local_xstream, &p_new->thread, &p_old->thread,
-                          p_new->thread.p_parent);
-    p_local_xstream->p_thread = &p_new->thread;
-    p_new->thread.p_last_xstream = p_local_xstream;
-    /* Context switch starts. */
-    ABTI_ythread_context_switch_with_call(p_old, p_new, f_cb, cb_arg);
-    /* Context switch finishes. */
-    *pp_local_xstream = p_old->thread.p_last_xstream;
-}
-
 static inline ABT_bool ABTI_ythread_context_peek(ABTI_ythread *p_ythread,
                                                  void (*f_peek)(void *),
                                                  void *arg)
@@ -231,97 +214,31 @@ static inline ABT_bool ABTI_ythread_context_peek(ABTI_ythread *p_ythread,
     return ABTD_ythread_context_peek(&p_ythread->ctx, f_peek, arg);
 }
 
-/* Return the previous thread. */
-static inline void ABTI_ythread_switch_to_sibling_nocb(
-    ABTI_xstream **pp_local_xstream, ABTI_ythread *p_old, ABTI_ythread *p_new,
-    ABT_sync_event_type sync_event_type, void *p_sync)
-{
-    return ABTI_ythread_switch_to_sibling_nocb_internal(pp_local_xstream, p_old,
-                                                        p_new, ABT_FALSE,
-                                                        sync_event_type,
-                                                        p_sync);
-}
-
-static inline void ABTI_ythread_switch_to_parent_nocb(
-    ABTI_xstream **pp_local_xstream, ABTI_ythread *p_old,
-    ABT_sync_event_type sync_event_type, void *p_sync)
-{
-    return ABTI_ythread_switch_to_parent_nocb_internal(pp_local_xstream, p_old,
-                                                       ABT_FALSE,
-                                                       sync_event_type, p_sync);
-}
-
-static inline void ABTI_ythread_switch_to_child_nocb(ABTI_xstream **pp_local_xstream,
+static inline void
+ABTI_ythread_switch_to_child_nocb(ABTI_xstream **pp_local_xstream,
                                   ABTI_ythread *p_old, ABTI_ythread *p_new)
 {
     return ABTI_ythread_switch_to_child_nocb_internal(pp_local_xstream, p_old,
                                                       p_new);
 }
 
-ABTU_noreturn static inline void
-ABTI_ythread_jump_to_sibling_nocb(ABTI_xstream *p_local_xstream,
-                                  ABTI_ythread *p_old, ABTI_ythread *p_new)
-{
-    ABTI_ythread_switch_to_sibling_nocb_internal(&p_local_xstream, p_old, p_new,
-                                                 ABT_TRUE,
-                                                 ABT_SYNC_EVENT_TYPE_UNKNOWN,
-                                                 NULL);
-    ABTU_unreachable();
-}
-
-ABTU_noreturn static inline void
-ABTI_ythread_jump_to_parent_nocb(ABTI_xstream *p_local_xstream,
-                                 ABTI_ythread *p_old)
-{
-    ABTI_ythread_switch_to_parent_nocb_internal(&p_local_xstream, p_old,
-                                                ABT_TRUE,
-                                                ABT_SYNC_EVENT_TYPE_UNKNOWN,
-                                                NULL);
-    ABTU_unreachable();
-}
-
-static inline void ABTI_ythread_yield_nocb(ABTI_xstream **pp_local_xstream,
-                                           ABTI_ythread *p_ythread,
-                                           ABT_sync_event_type sync_event_type,
-                                           void *p_sync)
-{
-    /* Change the state of current running thread */
-    ABTD_atomic_release_store_int(&p_ythread->thread.state,
-                                  ABT_THREAD_STATE_READY);
-
-    /* Switch to the top scheduler */
-    ABTI_ythread_switch_to_parent_nocb(pp_local_xstream, p_ythread,
-                                       sync_event_type, p_sync);
-    /* Back to the original thread */
-}
-
-/* Return the previous thread. */
 static inline void ABTI_ythread_switch_to_sibling_cb(
     ABTI_xstream **pp_local_xstream, ABTI_ythread *p_old, ABTI_ythread *p_new,
     void (*f_cb)(void *), void *cb_arg, ABT_sync_event_type sync_event_type,
     void *p_sync)
 {
-    ABTI_ythread_switch_to_sibling_cb_internal(pp_local_xstream, p_old,
-                                                      p_new, ABT_FALSE, f_cb,
-                                                      cb_arg, sync_event_type,
-                                                      p_sync);
+    ABTI_ythread_switch_to_sibling_cb_internal(pp_local_xstream, p_old, p_new,
+                                               ABT_FALSE, f_cb, cb_arg,
+                                               sync_event_type, p_sync);
 }
 
-static inline void  ABTI_ythread_switch_to_parent_cb(
+static inline void ABTI_ythread_switch_to_parent_cb(
     ABTI_xstream **pp_local_xstream, ABTI_ythread *p_old, void (*f_cb)(void *),
     void *cb_arg, ABT_sync_event_type sync_event_type, void *p_sync)
 {
     ABTI_ythread_switch_to_parent_cb_internal(pp_local_xstream, p_old,
-                                                     ABT_FALSE, f_cb, cb_arg,
-                                                     sync_event_type, p_sync);
-}
-
-static inline void ABTI_ythread_switch_to_child_cb(ABTI_xstream **pp_local_xstream,
-                                ABTI_ythread *p_old, ABTI_ythread *p_new,
-                                void (*f_cb)(void *), void *cb_arg)
-{
-    ABTI_ythread_switch_to_child_cb_internal(pp_local_xstream, p_old,
-                                                    p_new, f_cb, cb_arg);
+                                              ABT_FALSE, f_cb, cb_arg,
+                                              sync_event_type, p_sync);
 }
 
 ABTU_noreturn static inline void

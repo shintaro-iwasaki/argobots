@@ -3020,7 +3020,7 @@ static void thread_root_func(void *arg)
 
     if (p_local_xstream->type == ABTI_XSTREAM_TYPE_PRIMARY) {
         /* Let us jump back to the primary thread (then finalize Argobots) */
-        ABTI_ythread_jump_to_primary(p_local_xstream, p_root_ythread,
+        ABTI_ythread_jump_to_primary(p_local_xstream,
                                      p_global->p_primary_ythread);
     }
 }
@@ -3043,7 +3043,6 @@ static void thread_main_sched_func(void *arg)
         /* We free the current main scheduler and replace it if requested. */
         if (ABTD_atomic_relaxed_load_uint32(&p_sched->request) &
             ABTI_SCHED_REQ_REPLACE) {
-            printf("real update %p -> %p: wake up %p\n", p_sched, p_sched->p_replace_sched, p_sched->p_replace_waiter);
             ABTI_ythread *p_waiter = p_sched->p_replace_waiter;
             ABTI_sched *p_new_sched = p_sched->p_replace_sched;
             /* Set this scheduler as a main scheduler */

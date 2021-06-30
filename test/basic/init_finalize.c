@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
     }
     ATS_init(argc, argv, num_threads);
 
-#if 0
     threads = (pthread_t *)malloc(num_threads * sizeof(pthread_t));
     assert(threads);
 
@@ -66,7 +65,7 @@ int main(int argc, char *argv[])
         assert(ret == 0);
     }
     free(threads);
-#endif
+
     /* Finalize */
     ret = ATS_finalize(0);
 

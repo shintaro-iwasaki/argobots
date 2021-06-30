@@ -2084,7 +2084,6 @@ static int xstream_update_main_sched(ABTI_global *p_global,
             }
         }
         if (p_main_sched->p_replace_sched) {
-            printf("update %p -> %p: overwrite / wake up %p / sleep %p\n", p_main_sched, p_sched, p_main_sched->p_replace_waiter, p_ythread);
             /* We need to overwrite the scheduler.  Free the existing one. */
             ABTI_ythread *p_waiter = p_main_sched->p_replace_waiter;
             ABTI_sched_discard_and_free(p_global,
@@ -2098,8 +2097,6 @@ static int xstream_update_main_sched(ABTI_global *p_global,
              * immediately and was replaced by this new scheduler. */
             ABTI_ythread_set_ready(ABTI_xstream_get_local(*pp_local_xstream),
                                    p_waiter);
-        } else {
-            printf("update %p -> %p: no overwrite / sleep %p\n", p_main_sched, p_sched, p_ythread);
         }
         /* Set the replace scheduler */
         p_main_sched->p_replace_sched = p_sched;
