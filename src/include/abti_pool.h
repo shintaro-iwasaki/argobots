@@ -41,13 +41,16 @@ static inline ABT_pool ABTI_pool_get_handle(ABTI_pool *p_pool)
 /* A ULT is blocked and is waiting for going back to this pool */
 static inline void ABTI_pool_inc_num_blocked(ABTI_pool *p_pool)
 {
+    printf("inc_num_blocked: P%d\n", (int)p_pool->id);
     ABTD_atomic_fetch_add_int32(&p_pool->num_blocked, 1);
 }
 
 /* A blocked ULT is back in the pool */
 static inline void ABTI_pool_dec_num_blocked(ABTI_pool *p_pool)
 {
-    ABTD_atomic_fetch_sub_int32(&p_pool->num_blocked, 1);
+    printf("dec_num_blocked: P%d\n", (int)p_pool->id);
+    int32_t num = ABTD_atomic_fetch_sub_int32(&p_pool->num_blocked, 1);
+    ABTI_ASSERT(num > 0);
 }
 
 static inline void ABTI_pool_push(ABTI_pool *p_pool, ABT_unit unit)

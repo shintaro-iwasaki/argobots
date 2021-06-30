@@ -16,50 +16,11 @@ static void ythread_unwind_stack(void *arg);
 
 #endif
 
-void ABTI_ythread_set_blocked(ABTI_ythread *p_ythread)
-{
-    /* The root thread cannot be blocked */
-    ABTI_ASSERT(!(p_ythread->thread.type & ABTI_THREAD_TYPE_ROOT));
-
-    /* To prevent the scheduler from adding the ULT to the pool */
-    ABTI_thread_set_request(&p_ythread->thread, ABTI_THREAD_REQ_BLOCK);
-
-    /* Change the ULT's state to BLOCKED */
-    ABTD_atomic_release_store_int(&p_ythread->thread.state,
-                                  ABT_THREAD_STATE_BLOCKED);
-
-    /* Increase the number of blocked ULTs */
-    ABTI_pool *p_pool = p_ythread->thread.p_pool;
-    ABTI_pool_inc_num_blocked(p_pool);
-}
-
-/* NOTE: This routine should be called after ABTI_ythread_set_blocked. */
-void ABTI_ythread_suspend(ABTI_xstream **pp_local_xstream,
-                          ABTI_ythread *p_ythread,
-                          ABT_sync_event_type sync_event_type, void *p_sync)
-{
-    ABTI_xstream *p_local_xstream = *pp_local_xstream;
-    ABTI_ASSERT(&p_ythread->thread == p_local_xstream->p_thread);
-    ABTI_ASSERT(p_ythread->thread.p_last_xstream == p_local_xstream);
-
-    /* Switch to the scheduler, i.e., suspend p_ythread  */
-    ABTI_ythread_switch_to_parent(pp_local_xstream, p_ythread, sync_event_type,
-                                  p_sync);
-    /* The suspended ULT resumes its execution from here. */
-}
-
 void ABTI_ythread_set_ready(ABTI_local *p_local, ABTI_ythread *p_ythread)
 {
     /* The ULT must be in BLOCKED state. */
     ABTI_ASSERT(ABTD_atomic_acquire_load_int(&p_ythread->thread.state) ==
                 ABT_THREAD_STATE_BLOCKED);
-
-    /* We should wait until the scheduler of the blocked ULT resets the BLOCK
-     * request. Otherwise, the ULT can be pushed to a pool here and be
-     * scheduled by another scheduler if it is pushed to a shared pool. */
-    while (ABTD_atomic_acquire_load_uint32(&p_ythread->thread.request) &
-           ABTI_THREAD_REQ_BLOCK)
-        ABTD_atomic_pause();
 
     ABTI_event_ythread_resume(p_local, p_ythread,
                               ABTI_local_get_xstream_or_null(p_local)

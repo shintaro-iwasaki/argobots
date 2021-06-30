@@ -1148,37 +1148,25 @@ int ABT_thread_yield_to(ABT_thread thread)
     }
 
     /* Remove the target ULT from the pool */
-    if (ABTI_IS_ERROR_CHECK_ENABLED) {
-        /* This is necessary to prevent the size of this pool from 0. */
-        ABTI_pool_inc_num_blocked(p_tar_ythread->thread.p_pool);
-    }
+    /* This is necessary to prevent the size of this pool from 0. */
+    ABTI_pool_inc_num_blocked(p_cur_ythread->thread.p_pool);
     int abt_errno = ABTI_pool_remove(p_tar_ythread->thread.p_pool,
                                      p_tar_ythread->thread.unit);
-    if (ABTI_IS_ERROR_CHECK_ENABLED) {
-        ABTI_pool_dec_num_blocked(p_tar_ythread->thread.p_pool);
-        ABTI_CHECK_ERROR(abt_errno);
+    if (ABTI_IS_ERROR_CHECK_ENABLED && abt_errno != ABT_SUCCESS) {
+        ABTI_pool_dec_num_blocked(p_cur_ythread->thread.p_pool);
+        ABTI_HANDLE_ERROR(abt_errno);
     }
 
     ABTD_atomic_release_store_int(&p_cur_ythread->thread.state,
                                   ABT_THREAD_STATE_READY);
-
-    /* This operation is corresponding to yield */
-    ABTI_event_ythread_yield(p_local_xstream, p_cur_ythread,
-                             p_cur_ythread->thread.p_parent,
-                             ABT_SYNC_EVENT_TYPE_USER, NULL);
-
-    /* Add the current thread to the pool again. */
-    ABTI_pool_push(p_cur_ythread->thread.p_pool, p_cur_ythread->thread.unit);
-
-    /* We set the last ES */
-    p_tar_ythread->thread.p_last_xstream = p_local_xstream;
-
     /* Switch the context */
     ABTD_atomic_release_store_int(&p_tar_ythread->thread.state,
                                   ABT_THREAD_STATE_RUNNING);
-    ABTI_ythread_switch_to_sibling(&p_local_xstream, p_cur_ythread,
-                                   p_tar_ythread, ABT_SYNC_EVENT_TYPE_USER,
-                                   NULL);
+    ABTI_ythread_switch_to_sibling_cb(&p_local_xstream, p_cur_ythread,
+                                      p_tar_ythread,
+                                      ABTI_context_switch_callback_yield_to,
+                                      (void *)p_cur_ythread,
+                                      ABT_SYNC_EVENT_TYPE_USER, NULL);
     return ABT_SUCCESS;
 }
 
@@ -1233,8 +1221,9 @@ int ABT_thread_yield(void)
     ABTI_SETUP_LOCAL_YTHREAD(&p_local_xstream, &p_ythread);
 #endif
 
-    ABTI_ythread_yield(&p_local_xstream, p_ythread, ABT_SYNC_EVENT_TYPE_USER,
-                       NULL);
+    ABTI_ythread_yield_cb(&p_local_xstream, p_ythread,
+                          ABTI_context_switch_callback_yield, (void *)p_ythread,
+                          ABT_SYNC_EVENT_TYPE_USER, NULL);
     return ABT_SUCCESS;
 }
 
@@ -2502,9 +2491,6 @@ void ABTI_ythread_free_root(ABTI_global *p_global, ABTI_local *p_local,
 ABTU_noreturn void ABTI_ythread_exit(ABTI_xstream *p_local_xstream,
                                      ABTI_ythread *p_ythread)
 {
-    /* Set the exit request */
-    ABTI_thread_set_request(&p_ythread->thread, ABTI_THREAD_REQ_TERMINATE);
-
     /* Terminate this ULT */
     ABTD_ythread_exit(p_local_xstream, p_ythread);
     ABTU_unreachable();
@@ -2905,8 +2891,10 @@ static void thread_join_yield_thread(ABTI_xstream **pp_local_xstream,
 {
     while (ABTD_atomic_acquire_load_int(&p_thread->state) !=
            ABT_THREAD_STATE_TERMINATED) {
-        ABTI_ythread_yield(pp_local_xstream, p_self,
-                           ABT_SYNC_EVENT_TYPE_THREAD_JOIN, (void *)p_thread);
+        ABTI_ythread_yield_cb(pp_local_xstream, p_self,
+                              ABTI_context_switch_callback_yield,
+                              (void *)p_self, ABT_SYNC_EVENT_TYPE_THREAD_JOIN,
+                              (void *)p_thread);
     }
     ABTI_event_thread_join(ABTI_xstream_get_local(*pp_local_xstream), p_thread,
                            &p_self->thread);
@@ -2968,17 +2956,13 @@ static inline void thread_join(ABTI_local **pp_local, ABTI_thread *p_thread)
         return;
     }
 
-    ABTI_ythread_set_blocked(p_self);
-
-    /* Set the link in the context of the target ULT. This p_link might be
-     * read by p_ythread running on another ES in parallel, so release-store
-     * is needed here. */
-    ABTD_atomic_release_store_ythread_context_ptr(&p_ythread->ctx.p_link,
-                                                  &p_self->ctx);
-
     /* Suspend the current ULT */
-    ABTI_ythread_suspend(&p_local_xstream, p_self,
-                         ABT_SYNC_EVENT_TYPE_THREAD_JOIN, (void *)p_ythread);
+    ABTI_context_switch_callback_suspend_join_arg arg = { p_self, p_ythread };
+    ABTI_ythread_switch_to_parent_cb(&p_local_xstream, p_self,
+                                     ABTI_context_switch_callback_suspend_join,
+                                     (void *)&arg,
+                                     ABT_SYNC_EVENT_TYPE_THREAD_JOIN,
+                                     (void *)p_ythread);
     *pp_local = ABTI_xstream_get_local(p_local_xstream);
 
     /* Resume */
@@ -3059,6 +3043,7 @@ static void thread_main_sched_func(void *arg)
         /* We free the current main scheduler and replace it if requested. */
         if (ABTD_atomic_relaxed_load_uint32(&p_sched->request) &
             ABTI_SCHED_REQ_REPLACE) {
+            printf("real update %p -> %p: wake up %p\n", p_sched, p_sched->p_replace_sched, p_sched->p_replace_waiter);
             ABTI_ythread *p_waiter = p_sched->p_replace_waiter;
             ABTI_sched *p_new_sched = p_sched->p_replace_sched;
             /* Set this scheduler as a main scheduler */
@@ -3084,7 +3069,7 @@ static void thread_main_sched_func(void *arg)
 
         /* If there is an exit or a cancel request, the ES terminates
          * regardless of remaining work units. */
-        if (request & (ABTI_THREAD_REQ_TERMINATE | ABTI_THREAD_REQ_CANCEL))
+        if (request & ABTI_THREAD_REQ_CANCEL)
             break;
 
         /* When join is requested, the ES terminates after finishing

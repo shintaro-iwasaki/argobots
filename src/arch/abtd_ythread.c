@@ -30,14 +30,14 @@ static inline void ythread_terminate(ABTI_xstream *p_local_xstream,
     ABTD_ythread_context *p_link =
         ABTD_atomic_acquire_load_ythread_context_ptr(&p_ctx->p_link);
     if (!p_link) {
-        uint32_t req =
-            ABTD_atomic_fetch_or_uint32(&p_ythread->thread.request,
-                                        ABTI_THREAD_REQ_JOIN |
-                                            ABTI_THREAD_REQ_TERMINATE);
+        uint32_t req = ABTD_atomic_fetch_or_uint32(&p_ythread->thread.request,
+                                                   ABTI_THREAD_REQ_JOIN);
         if (!(req & ABTI_THREAD_REQ_JOIN)) {
             /* This case means there is no join request.  Let's go back to the
              * parent ULT */
-            ABTI_ythread_jump_to_parent(p_local_xstream, p_ythread);
+            ABTI_ythread_jump_to_parent_cb(
+                p_local_xstream, p_ythread,
+                ABTI_context_switch_callback_terminate, (void *)p_ythread);
             ABTU_unreachable();
         } else {
             /* This case means there has been a join request and the joiner has
@@ -63,14 +63,14 @@ static inline void ythread_terminate(ABTI_xstream *p_local_xstream,
         if (p_ythread->thread.p_last_xstream ==
                 p_joiner->thread.p_last_xstream &&
             !(p_ythread->thread.type & ABTI_THREAD_TYPE_MAIN_SCHED)) {
-        /* Only when the current ULT is on the same ES as p_joiner's,
-         * we can jump to the joiner ULT. */
-        ABTD_atomic_release_store_int(&p_ythread->thread.state,
-                                      ABT_THREAD_STATE_TERMINATED);
-        /* Note that a parent ULT cannot be a joiner. */
+        /* Only when the current ULT is on the same ES as p_joiner's, we can
+         * jump to the joiner ULT.  Note that a parent ULT cannot be a joiner.
+         */
         ABTI_event_ythread_resume(ABTI_xstream_get_local(p_local_xstream),
                                   p_joiner, &p_ythread->thread);
-        ABTI_ythread_jump_to_sibling(p_local_xstream, p_ythread, p_joiner);
+        ABTI_ythread_jump_to_sibling_cb(p_local_xstream, p_ythread, p_joiner,
+                                        ABTI_context_switch_callback_terminate,
+                                        (void *)p_ythread);
         ABTU_unreachable();
     } else {
         /* If the current ULT's associated ES is different from p_joiner's, we
@@ -81,12 +81,10 @@ static inline void ythread_terminate(ABTI_xstream *p_local_xstream,
         ABTI_ythread_set_ready(ABTI_xstream_get_local(p_local_xstream),
                                p_joiner);
     }
-    /* We don't need to use the atomic OR operation here because the ULT
-     * will be terminated regardless of other requests. */
-    ABTD_atomic_release_store_uint32(&p_ythread->thread.request,
-                                     ABTI_THREAD_REQ_TERMINATE);
     /* The waiter has been resumed.  Let's switch to the parent. */
-    ABTI_ythread_jump_to_parent(p_local_xstream, p_ythread);
+    ABTI_ythread_jump_to_parent_cb(p_local_xstream, p_ythread,
+                                   ABTI_context_switch_callback_terminate,
+                                   (void *)p_ythread);
     ABTU_unreachable();
 }
 
@@ -106,10 +104,8 @@ void ABTD_ythread_cancel(ABTI_xstream *p_local_xstream, ABTI_ythread *p_ythread)
         ABTI_ythread_set_ready(ABTI_xstream_get_local(p_local_xstream),
                                p_joiner);
     } else {
-        uint32_t req =
-            ABTD_atomic_fetch_or_uint32(&p_ythread->thread.request,
-                                        ABTI_THREAD_REQ_JOIN |
-                                            ABTI_THREAD_REQ_TERMINATE);
+        uint32_t req = ABTD_atomic_fetch_or_uint32(&p_ythread->thread.request,
+                                                   ABTI_THREAD_REQ_JOIN);
         if (req & ABTI_THREAD_REQ_JOIN) {
             /* This case means there has been a join request and the joiner has
              * blocked.  We have to wake up the joiner ULT. */
